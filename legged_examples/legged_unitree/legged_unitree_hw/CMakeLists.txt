@@ -3,6 +3,17 @@ project(legged_unitree_hw)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+add_compile_options(-std=c++14)
+
+# check arch and os
+message("-- CMAKE_SYSTEM_PROCESSOR: ${CMAKE_SYSTEM_PROCESSOR}")
+if("${CMAKE_SYSTEM_PROCESSOR}" MATCHES "x86_64.*")
+  set(ARCH amd64)
+endif()
+if("${CMAKE_SYSTEM_PROCESSOR}" MATCHES "aarch64.*")
+  set(ARCH arm64)
+endif()
+
 find_package(catkin REQUIRED
         COMPONENTS
         roscpp
@@ -26,9 +37,12 @@ include_directories(
         ${catkin_INCLUDE_DIRS}
 )
 
-link_directories(lib)
+# link_directories(lib)
+link_directories(lib/cpp/${ARCH})
 
-set(EXTRA_LIBS libunitree_legged_sdk_amd64.so lcm)
+#set(EXTRA_LIBS libunitree_legged_sdk_amd64.so lcm)
+set(EXTRA_LIBS -pthread libunitree_legged_sdk.so)
+# set(CMAKE_CXX_FLAGS "-03 -fPIC")
 
 ## Declare cpp executables
 add_executable(${PROJECT_NAME}
@@ -75,6 +89,10 @@ install(DIRECTORY include/${PROJECT_NAME}/
         )
 
 # Mark other files for installation
-install(DIRECTORY config launch lib
+install(DIRECTORY config launch lib/cpp/${ARCH}
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
         )
+
+# install(DIRECTORY lib/cpp/${ARCH}/
+#         DESTINATION lib/unitree
+#         USE_SOURCE_PERMISSIONS)
