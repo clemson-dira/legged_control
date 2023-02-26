@@ -17,15 +17,23 @@ bool UnitreeHW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) {
   setupImu();
   setupContactSensor(robot_hw_nh);
 
-  udp_ = std::make_shared<UNITREE_LEGGED_SDK::UDP>(UNITREE_LEGGED_SDK::LOWLEVEL);
+  // udp_ =
+  // std::make_shared<UNITREE_LEGGED_SDK::UDP>(UNITREE_LEGGED_SDK::LOWLEVEL);
+  udp_ = std::make_shared<UNITREE_LEGGED_SDK::UDP>(
+      UNITREE_LEGGED_SDK::LOWLEVEL, 8090, "192.168.123.10", 8007);
   udp_->InitCmdData(lowCmd_);
 
   std::string robot_type;
   root_nh.getParam("robot_type", robot_type);
   if (robot_type == "a1") {
-    safety_ = std::make_shared<UNITREE_LEGGED_SDK::Safety>(UNITREE_LEGGED_SDK::LeggedType::A1);
+    safety_ = std::make_shared<UNITREE_LEGGED_SDK::Safety>(
+        UNITREE_LEGGED_SDK::LeggedType::A1);
   } else if (robot_type == "aliengo") {
-    safety_ = std::make_shared<UNITREE_LEGGED_SDK::Safety>(UNITREE_LEGGED_SDK::LeggedType::Aliengo);
+    safety_ = std::make_shared<UNITREE_LEGGED_SDK::Safety>(
+        UNITREE_LEGGED_SDK::LeggedType::Aliengo);
+  } else if (robot_type == "go1") {
+    safety_ = std::make_shared<UNITREE_LEGGED_SDK::Safety>(
+        UNITREE_LEGGED_SDK::LeggedType::Go1);
   } else {
     ROS_FATAL("Unknown robot type: %s", robot_type.c_str());
     return false;
@@ -33,7 +41,8 @@ bool UnitreeHW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) {
   return true;
 }
 
-void UnitreeHW::read(const ros::Time& /*time*/, const ros::Duration& /*period*/) {
+void UnitreeHW::read(const ros::Time& /*time*/,
+                     const ros::Duration& /*period*/) {
   udp_->Recv();
   udp_->GetRecv(lowState_);
 
@@ -58,7 +67,8 @@ void UnitreeHW::read(const ros::Time& /*time*/, const ros::Duration& /*period*/)
     contactState_[i] = lowState_.footForce[i] > contactThreshold_;
   }
 
-  // Set feedforward and velocity cmd to zero to avoid for safety when not controller setCommand
+  // Set feedforward and velocity cmd to zero to avoid for safety when not
+  // controller setCommand
   std::vector<std::string> names = hybridJointInterface_.getNames();
   for (const auto& name : names) {
     HybridJointHandle handle = hybridJointInterface_.getHandle(name);
@@ -68,7 +78,8 @@ void UnitreeHW::read(const ros::Time& /*time*/, const ros::Duration& /*period*/)
   }
 }
 
-void UnitreeHW::write(const ros::Time& /*time*/, const ros::Duration& /*period*/) {
+void UnitreeHW::write(const ros::Time& /*time*/,
+                      const ros::Duration& /*period*/) {
   for (int i = 0; i < 12; ++i) {
     lowCmd_.motorCmd[i].q = static_cast<float>(jointData_[i].posDes_);
     lowCmd_.motorCmd[i].dq = static_cast<float>(jointData_[i].velDes_);
@@ -109,19 +120,23 @@ bool UnitreeHW::setupJoints() {
     }
 
     int index = leg_index * 3 + joint_index;
-    hardware_interface::JointStateHandle state_handle(joint.first, &jointData_[index].pos_, &jointData_[index].vel_,
-                                                      &jointData_[index].tau_);
+    hardware_interface::JointStateHandle state_handle(
+        joint.first, &jointData_[index].pos_, &jointData_[index].vel_,
+        &jointData_[index].tau_);
     jointStateInterface_.registerHandle(state_handle);
-    hybridJointInterface_.registerHandle(HybridJointHandle(state_handle, &jointData_[index].posDes_, &jointData_[index].velDes_,
-                                                           &jointData_[index].kp_, &jointData_[index].kd_, &jointData_[index].ff_));
+    hybridJointInterface_.registerHandle(
+        HybridJointHandle(state_handle, &jointData_[index].posDes_,
+                          &jointData_[index].velDes_, &jointData_[index].kp_,
+                          &jointData_[index].kd_, &jointData_[index].ff_));
   }
   return true;
 }
 
 bool UnitreeHW::setupImu() {
-  imuSensorInterface_.registerHandle(hardware_interface::ImuSensorHandle("unitree_imu", "unitree_imu", imuData_.ori_, imuData_.oriCov_,
-                                                                         imuData_.angularVel_, imuData_.angularVelCov_, imuData_.linearAcc_,
-                                                                         imuData_.linearAccCov_));
+  imuSensorInterface_.registerHandle(hardware_interface::ImuSensorHandle(
+      "unitree_imu", "unitree_imu", imuData_.ori_, imuData_.oriCov_,
+      imuData_.angularVel_, imuData_.angularVelCov_, imuData_.linearAcc_,
+      imuData_.linearAccCov_));
   imuData_.oriCov_[0] = 0.0012;
   imuData_.oriCov_[4] = 0.0012;
   imuData_.oriCov_[8] = 0.0012;
@@ -136,7 +151,8 @@ bool UnitreeHW::setupImu() {
 bool UnitreeHW::setupContactSensor(ros::NodeHandle& nh) {
   nh.getParam("contact_threshold", contactThreshold_);
   for (size_t i = 0; i < CONTACT_SENSOR_NAMES.size(); ++i) {
-    contactSensorInterface_.registerHandle(ContactSensorHandle(CONTACT_SENSOR_NAMES[i], &contactState_[i]));
+    contactSensorInterface_.registerHandle(
+        ContactSensorHandle(CONTACT_SENSOR_NAMES[i], &contactState_[i]));
   }
   return true;
 }
