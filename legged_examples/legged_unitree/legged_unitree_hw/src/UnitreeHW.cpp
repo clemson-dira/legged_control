@@ -86,9 +86,14 @@ void UnitreeHW::write(const ros::Time& /*time*/,
     lowCmd_.motorCmd[i].Kp = static_cast<float>(jointData_[i].kp_);
     lowCmd_.motorCmd[i].Kd = static_cast<float>(jointData_[i].kd_);
     lowCmd_.motorCmd[i].tau = static_cast<float>(jointData_[i].ff_);
+    ROS_WARN("Torque: %0.2f", lowCmd_.motorCmd[i].tau);
   }
   safety_->PositionLimit(lowCmd_);
-  safety_->PowerProtect(lowCmd_, lowState_, powerLimit_);
+  int res_check = safety_->PowerProtect(lowCmd_, lowState_, powerLimit_);
+  if (res_check < 0){
+    ROS_ERROR("Power Protect Triggered!!!");
+    exit(-1);
+  }
   udp_->SetSend(lowCmd_);
   udp_->Send();
 }

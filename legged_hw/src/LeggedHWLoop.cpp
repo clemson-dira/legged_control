@@ -12,7 +12,7 @@ LeggedHWLoop::LeggedHWLoop(ros::NodeHandle& nh, std::shared_ptr<LeggedHW> hardwa
 
   // Load ros params
   int error = 0;
-  int threadPriority = 0;
+  int threadPriority = 0; // Original value: 0
   ros::NodeHandle nhP("~");
   error += static_cast<int>(!nhP.getParam("loop_frequency", loopHz_));
   error += static_cast<int>(!nhP.getParam("cycle_time_error_threshold", cycleTimeErrorThreshold_));

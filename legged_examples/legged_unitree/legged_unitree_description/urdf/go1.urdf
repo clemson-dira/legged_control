@@ -287,7 +287,8 @@
     <kd value="1.0"/>
   </gazebo>
   <!-- Rotor related joint and link is only for demonstrate location. -->
-  <!-- Actually, the rotor will rotate and the joint is not fixed. Reduction ratio should be considered. -->
+  <!-- Actually, the rotor will rotate and the joint is not fixed. Reduction ratio should be
+    considered. -->
   <!-- Debug mode will hung up the robot, use "true" or "false" to switch it. -->
   <!-- <xacro:if value="$(arg DEBUG)">
         <link name="world"/>
@@ -331,6 +332,11 @@
       <inertia ixx="0.0168128557" ixy="-0.0002296769" ixz="-0.0002945293" iyy="0.063009565" iyz="-4.18731e-05" izz="0.0716547275"/>
     </inertial>
   </link>
+  <!-- <link name="world" />
+    <joint name="base_world" type="fixed">
+        <parent link="world" />
+        <child link="base" />
+    </joint> -->
   <!-- Imu is fixed to the base link -->
   <joint name="unitree_imu_joint" type="fixed">
     <origin rpy="0. 0. 0." xyz="0. 0. 0."/>
