@@ -1,0 +1,67 @@
+<launch>
+    <!-- Launch file to downsample the pointcloud data -->
+    <arg name="multi_realsense_enabled" default="false"/>
+
+
+    <!-- Run a passthrough filter to down-sample the sensor point cloud -->
+    <node pkg="nodelet" type="nodelet" name="pcl_manager" args="manager" output="screen"/>
+    <node pkg="nodelet" type="nodelet" name="voxel_grid_face" args="load pcl/VoxelGrid pcl_manager" output="screen">
+        <remap from="~input" to="/cam1/point_cloud_face"/>
+        <remap from="~output" to="/cam1/point_cloud_face_downsampled"/>
+        <rosparam>
+            filter_field_name: z
+            filter_limit_min: 0.01
+            filter_limit_max: 6.0 <!-- Limit the range of points to forward to 6 meters in viewing direction -->
+            filter_limit_negative: False
+            leaf_size: 0.05 <!-- Limit the density to 5cm -->
+        </rosparam>
+    </node>
+
+    <!-- <node if="$(arg multi_realsense_enabled)" pkg="nodelet" type="nodelet" name="voxel_grid_chin" args="load pcl/VoxelGrid pcl_manager" output="screen">
+        <remap from="~input" to="/cam2/point_cloud_chin"/>
+        <remap from="~output" to="/cam2/point_cloud_chin_downsampled"/>
+        <rosparam>
+            filter_field_name: z
+            filter_limit_min: 0.01
+            filter_limit_max: 6.0 
+            filter_limit_negative: False
+            leaf_size: 0.05
+        </rosparam>
+    </node> -->
+    
+    <node if="$(arg multi_realsense_enabled)" pkg="nodelet" type="nodelet" name="voxel_grid_left" args="load pcl/VoxelGrid pcl_manager" output="screen">
+        <remap from="~input" to="/cam3/point_cloud_left"/>
+        <remap from="~output" to="/cam3/point_cloud_left_downsampled"/>
+        <rosparam>
+            filter_field_name: z
+            filter_limit_min: 0.01
+            filter_limit_max: 6.0 <!-- Limit the range of points to forward to 6 meters in viewing direction -->
+            filter_limit_negative: False
+            leaf_size: 0.05 <!-- Limit the density to 5cm -->
+        </rosparam>
+    </node>
+
+    <node if="$(arg multi_realsense_enabled)" pkg="nodelet" type="nodelet" name="voxel_grid_right" args="load pcl/VoxelGrid pcl_manager" output="screen">
+        <remap from="~input" to="/cam4/point_cloud_right"/>
+        <remap from="~output" to="/cam4/point_cloud_right_downsampled"/>
+        <rosparam>
+            filter_field_name: z
+            filter_limit_min: 0.01
+            filter_limit_max: 6.0 
+            filter_limit_negative: False
+            leaf_size: 0.05
+        </rosparam>
+    </node>
+    
+    <!-- <node if="$(arg multi_realsense_enabled)" pkg="nodelet" type="nodelet" name="voxel_grid_rearDown" args="load pcl/VoxelGrid pcl_manager" output="screen">
+        <remap from="~input" to="/cam5/point_cloud_rearDown"/>
+        <remap from="~output" to="/cam5/point_cloud_rearDown_downsampled"/>
+        <rosparam>
+            filter_field_name: z
+            filter_limit_min: 0.01
+            filter_limit_max: 6.0
+            filter_limit_negative: False
+            leaf_size: 0.05
+        </rosparam>
+    </node> -->
+</launch>

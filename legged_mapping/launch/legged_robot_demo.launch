@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+    <!-- Spawn position -->
+    <arg name="x_pos" default="0.0" doc="Starting x coordinate of the robot in simulation"/>
+    <arg name="y_pos" default="0.0" doc="Starting y coordinate of the robot in simulation"/>
+    <arg name="z_pos" default="0.5" doc="Starting z coordinate of the robot in simulation"/>
+    <arg name="yaw_pos" default="0.0" doc="Starting yaw position of the robot in simulation"/>
+
+    <arg name="controller_spawner" default="true"/>
+    <arg name="cheater" default="false"/>
+
+    <arg name="robot_type" default="go1"/>
+    
+    <!-- Rviz & Gazebo Config -->
+    <arg name="gui" default="true"/>
+    <arg name="rviz" default="false"/>
+    <arg name="rviz_config" default="$(find legged_mapping)/rviz/legged_mapping.rviz"/>
+
+    <!-- Multi-realsense mapping -->
+    <arg name="multi_realsense_enabled" default="false"/>
+    
+    <!-- Load robot -->
+    <include file="$(find legged_unitree_description)/launch/load_world.launch">
+        <arg name="gui" value="$(arg gui)"/>
+        <arg name="rviz" value="$(arg rviz)"/>
+        <arg name="robot_spawn" value="-x $(arg x_pos) -y $(arg y_pos) -z $(arg z_pos) -Y $(arg yaw_pos)"/>
+        <arg name="rviz_config" value="$(arg rviz_config)"/>
+        <arg name="robot_type" value="$(arg robot_type)"/>
+    </include>
+
+    <!-- Load controller -->
+    <include file="$(find legged_controllers)/launch/load_controller.launch">
+        <arg name="spawner" value="$(arg controller_spawner)"/>
+        <arg name="cheater" value="$(arg cheater)"/>
+    </include>
+
+    <!-- No need to publish tf due to leggedHWSim controller..? -->
+
+    <!-- Publish tf 'base' as pose -->
+    <node pkg="legged_mapping" type="tf_to_pose_publisher.py" name="legged_pose_publisher">
+        <param name="from_frame" type="string" value="odom"/>
+        <param name="to_frame"  type="string" value="base"/>
+    </node>
+
+    <!-- Run a passthrough filter to down-sample the sensor point cloud -->
+    <include file="$(find legged_mapping)/launch/down_sample.launch">
+        <arg name="multi_realsense_enabled" value="$(arg multi_realsense_enabled)"/>
+    </include>
+    
+    <!-- Launch elevation mapping node -->
+    <node unless="$(arg multi_realsense_enabled)" pkg="elevation_mapping" type="elevation_mapping" name="elevation_mapping" output="screen" launch-prefix="gnome-terminal --">
+        <rosparam command="load" file="$(find legged_mapping)/config/go1.yaml"/>
+        <rosparam command="load" file="$(find legged_mapping)/config/postprocessor_pipeline.yaml"/>
+    </node>
+    <node if="$(arg multi_realsense_enabled)" pkg="elevation_mapping" type="elevation_mapping" name="elevation_mapping" output="screen" launch-prefix="gnome-terminal --">
+        <rosparam command="load" file="$(find legged_mapping)/config/go1_multi_realsense.yaml"/>
+        <rosparam command="load" file="$(find legged_mapping)/config/postprocessor_pipeline.yaml"/>
+    </node>
+</launch>
