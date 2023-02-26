@@ -13,12 +13,12 @@
         default="$(find legged_controllers)/config/$(arg robot_type)/gait.info" />
 
     <!-- make the files into global parameters -->
-    <param name="task_file" value="$(arg task_file)" />
-    <param name="reference_file" value="$(arg reference_file)" />
-    <param name="urdf_file" value="$(arg urdf_file)" />
+    <param name="taskFile" value="$(arg taskFile)" />
+    <param name="referenceFile" value="$(arg referenceFile)" />
+    <param name="urdfFile" value="$(arg urdfFile)" />
 
-    <param name="gaitCommandFile" value="$(arg gait_file)" />
-    <rosparam file="$(find legged_controllers)/config/default.yaml" command="load" />
+    <param name="gaitCommandFile" value="$(arg gaitCommandFile)" />
+    <rosparam file="$(find legged_controllers)/config/controllers.yaml" command="load" />
 
     <!-- Use spawner to load controller, automatically loads & initialize controller -->
     <group if="$(arg spawner)">
