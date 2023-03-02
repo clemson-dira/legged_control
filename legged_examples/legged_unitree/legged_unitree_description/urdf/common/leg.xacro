@@ -124,7 +124,7 @@
                 <material name="orange"/>
             </visual>
             <collision>
-                <origin rpy="0 ${pi/2.0} 0" xyz="0 0 ${-calf_length/2.0}"/>
+                <origin rpy="0 ${pi/2.0} 0" xyz="${calf_x_offset} 0 ${-calf_length/2.0}"/>
                 <geometry>
                     <box size="${calf_length} ${calf_width} ${calf_height}"/>
                 </geometry>
@@ -170,6 +170,33 @@
 
         <gazebo reference="${prefix}_foot_fixed">
             <disableFixedJointLumping>true</disableFixedJointLumping>
+        </gazebo>
+
+        <gazebo reference="${prefix}_hip">
+            <mu1>0.2</mu1>
+            <mu2>0.2</mu2>
+            <material>Gazebo/DarkGrey</material>
+        </gazebo>
+        <gazebo reference="${prefix}_thigh">
+            <mu1>0.2</mu1>
+            <mu2>0.2</mu2>
+            <self_collide>0</self_collide>
+            <material>Gazebo/DarkGrey</material>
+            <kp value="1000000.0"/>
+            <kd value="100.0"/>
+        </gazebo>
+        <gazebo reference="${prefix}_calf">
+            <mu1>0.6</mu1>
+            <mu2>0.6</mu2>
+            <self_collide>1</self_collide>
+        </gazebo>
+        <gazebo reference="${prefix}_FOOT">
+            <mu1>0.6</mu1>
+            <mu2>0.6</mu2>
+            <self_collide>1</self_collide>
+            <material>Gazebo/DarkGrey</material>
+            <kp value="1000000.0"/>
+            <kd value="100.0"/>
         </gazebo>
 
         <xacro:leg_transmission name="${prefix}"/>

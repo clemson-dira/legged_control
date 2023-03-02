@@ -60,3 +60,8 @@ install(
         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
         FILES_MATCHING PATTERN "*.h"
 )
+
+install(PROGRAMS scripts/generate_urdf.sh
+        DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}/scripts
+        )
+
