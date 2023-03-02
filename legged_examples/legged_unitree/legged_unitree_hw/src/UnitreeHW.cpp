@@ -86,6 +86,11 @@ void UnitreeHW::write(const ros::Time& /*time*/,
     lowCmd_.motorCmd[i].Kp = static_cast<float>(jointData_[i].kp_);
     lowCmd_.motorCmd[i].Kd = static_cast<float>(jointData_[i].kd_);
     lowCmd_.motorCmd[i].tau = static_cast<float>(jointData_[i].ff_);
+    ROS_WARN("joint: %d", i);
+    // ROS_WARN("Desired q: %0.2f", lowCmd_.motorCmd[i].q);
+    // ROS_WARN("Desired dq: %0.2f", lowCmd_.motorCmd[i].dq);
+    ROS_WARN("Kp: %0.2f", lowCmd_.motorCmd[i].Kp);
+    ROS_WARN("Kd: %0.2f", lowCmd_.motorCmd[i].Kd);
     ROS_WARN("Torque: %0.2f", lowCmd_.motorCmd[i].tau);
   }
   safety_->PositionLimit(lowCmd_);
