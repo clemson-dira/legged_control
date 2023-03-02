@@ -28,12 +28,15 @@ bool UnitreeHW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) {
   if (robot_type == "a1") {
     safety_ = std::make_shared<UNITREE_LEGGED_SDK::Safety>(
         UNITREE_LEGGED_SDK::LeggedType::A1);
+    ROS_INFO("Loading a1");
   } else if (robot_type == "aliengo") {
     safety_ = std::make_shared<UNITREE_LEGGED_SDK::Safety>(
         UNITREE_LEGGED_SDK::LeggedType::Aliengo);
+    ROS_INFO("Loading aliengo");
   } else if (robot_type == "go1") {
     safety_ = std::make_shared<UNITREE_LEGGED_SDK::Safety>(
         UNITREE_LEGGED_SDK::LeggedType::Go1);
+    ROS_INFO("Loading Go1");
   } else {
     ROS_FATAL("Unknown robot type: %s", robot_type.c_str());
     return false;
@@ -94,11 +97,7 @@ void UnitreeHW::write(const ros::Time& /*time*/,
     ROS_WARN("Torque: %0.2f", lowCmd_.motorCmd[i].tau);
   }
   safety_->PositionLimit(lowCmd_);
-  int res_check = safety_->PowerProtect(lowCmd_, lowState_, powerLimit_);
-  if (res_check < 0){
-    ROS_ERROR("Power Protect Triggered!!!");
-    exit(-1);
-  }
+  safety_->PowerProtect(lowCmd_, lowState_, powerLimit_);
   udp_->SetSend(lowCmd_);
   udp_->Send();
 }
