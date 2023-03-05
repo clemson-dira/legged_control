@@ -53,6 +53,9 @@ void UnitreeHW::read(const ros::Time& /*time*/,
     jointData_[i].pos_ = lowState_.motorState[i].q;
     jointData_[i].vel_ = lowState_.motorState[i].dq;
     jointData_[i].tau_ = lowState_.motorState[i].tauEst;
+    ROS_WARN_THROTTLE(2, "Tick time: %hu", lowState_.tick);
+    ROS_WARN_THROTTLE(2, "Joint: %d", i);
+    ROS_WARN_THROTTLE(2, "Estimated torque: %0.2f", jointData_[i].tau_);
   }
 
   imuData_.ori_[0] = lowState_.imu.quaternion[1];
@@ -89,12 +92,13 @@ void UnitreeHW::write(const ros::Time& /*time*/,
     lowCmd_.motorCmd[i].Kp = static_cast<float>(jointData_[i].kp_);
     lowCmd_.motorCmd[i].Kd = static_cast<float>(jointData_[i].kd_);
     lowCmd_.motorCmd[i].tau = static_cast<float>(jointData_[i].ff_);
-    ROS_WARN("joint: %d", i);
+    ROS_WARN_THROTTLE(2, "Tick time: %hu", lowState_.tick);
+    ROS_WARN_THROTTLE(2, "joint: %d", i);
     // ROS_WARN("Desired q: %0.2f", lowCmd_.motorCmd[i].q);
     // ROS_WARN("Desired dq: %0.2f", lowCmd_.motorCmd[i].dq);
-    ROS_WARN("Kp: %0.2f", lowCmd_.motorCmd[i].Kp);
-    ROS_WARN("Kd: %0.2f", lowCmd_.motorCmd[i].Kd);
-    ROS_WARN("Torque: %0.2f", lowCmd_.motorCmd[i].tau);
+    ROS_WARN_THROTTLE(2, "Kp: %0.2f", lowCmd_.motorCmd[i].Kp);
+    ROS_WARN_THROTTLE(2, "Kd: %0.2f", lowCmd_.motorCmd[i].Kd);
+    ROS_WARN_THROTTLE(2, "Torque: %0.2f", lowCmd_.motorCmd[i].tau);
   }
   safety_->PositionLimit(lowCmd_);
   safety_->PowerProtect(lowCmd_, lowState_, powerLimit_);
