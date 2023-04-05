@@ -7,6 +7,7 @@ Panels:
         - /Global Options1
         - /Status1
         - /RobotModel1
+        - /optimizedStateTrajectory1
       Splitter Ratio: 0.5
     Tree Height: 746
   - Class: rviz/Selection
@@ -52,7 +53,7 @@ Visualization Manager:
       Plane Cell Count: 10
       Reference Frame: <Fixed Frame>
       Value: true
-    - Alpha: 1
+    - Alpha: 0.6000000238418579
       Class: rviz/RobotModel
       Collision Enabled: false
       Enabled: true
@@ -322,9 +323,38 @@ Visualization Manager:
       Unreliable: false
       Use Rainbow: false
       Value: false
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /legged_robot/currentState
+      Name: currentState
+      Namespaces:
+        Center of Pressure: true
+        EE Forces: true
+        EE Positions: true
+        Support Polygon: true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /legged_robot/desiredBaseTrajectory
+      Name: desiredBaseTrajectory
+      Namespaces:
+        "": true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /legged_robot/optimizedStateTrajectory
+      Name: optimizedStateTrajectory
+      Namespaces:
+        CoM Trajectory: true
+        EE Trajectories: true
+        Future footholds: true
+      Queue Size: 100
+      Value: true
   Enabled: true
   Global Options:
-    Background Color: 48; 48; 48
+    Background Color: 238; 238; 236
     Default Light: true
     Fixed Frame: odom
     Frame Rate: 30
@@ -350,7 +380,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 2.5793509483337402
+      Distance: 1.062085747718811
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -358,17 +388,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: -0.5413793921470642
-        Y: 0.21098053455352783
-        Z: 0.28147000074386597
+        X: -0.01579950377345085
+        Y: -0.01308138482272625
+        Z: 0.33634260296821594
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.5953981280326843
+      Pitch: 1.4853975772857666
       Target Frame: <Fixed Frame>
-      Yaw: 0.8953982591629028
+      Yaw: 3.1353979110717773
     Saved: ~
 Window Geometry:
   Displays:
