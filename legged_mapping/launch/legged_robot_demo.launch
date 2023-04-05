@@ -16,6 +16,7 @@
     <arg name="rviz" default="false" />
     <arg name="rviz_config" default="$(find legged_mapping)/rviz/legged_mapping.rviz" />
     <arg name="paused" default="false" />
+    <arg name="world" default="worlds/empty.world" />
 
     <!-- Multi-realsense mapping -->
     <arg name="multi_realsense_enabled" default="false" />
