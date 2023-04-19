@@ -293,14 +293,14 @@ int main(int argc, char** argv) {
   // ROS_INFO("Settings: ");
   // ROS_INFO("targetDisplacementVelocity", TARGET_DISPLACEMENT_VELOCITY);
 
-  // TargetTrajectoriesPublisher target_pose_command(node_handle, robot_name,
-  //                                                 &goalToTargetTrajectories,
-  //                                                 &cmdVelToTargetTrajectories);
+  TargetTrajectoriesPublisher target_pose_command(node_handle, robot_name,
+                                                  &goalToTargetTrajectories,
+                                                  &cmdVelToTargetTrajectories);
 
-  // Test multiple trajectories
-  TargetTrajectoriesPublisher target_pose_command(
-      node_handle, robot_name, &test_goalToTargetTrajectories,
-      &cmdVelToTargetTrajectories);
+  // // Test multiple trajectories
+  // TargetTrajectoriesPublisher target_pose_command(
+  //     node_handle, robot_name, &test_goalToTargetTrajectories,
+  //     &cmdVelToTargetTrajectories);
   ros::spin();
   // Successful exit
   return 0;

@@ -1,0 +1,8 @@
+legged_body_planner:
+  update_rate: 100 # Hz
+
+trajectories_publisher:
+  update_rate: 100 # Hz
+
+# TODO (AZ): Start from making ROS Msg
+# TODO (AZ): Bad to mix ROS and their task.info... not sure what to do with this

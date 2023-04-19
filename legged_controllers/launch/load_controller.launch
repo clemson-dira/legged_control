@@ -5,13 +5,28 @@
     <arg name="cheater" default="false" />
     <arg name="spawner" default="false" />
 
+    <arg name="urdfFile" default="/tmp/legged_control/$(arg robot_type).urdf" />
+    <arg name="taskFile" default="$(find legged_controllers)/config/$(arg robot_type)/task.info" />
+    <arg name="referenceFile"
+        default="$(find legged_controllers)/config/$(arg robot_type)/reference.info" />
+    <arg name="gaitCommandFile"
+        default="$(find legged_controllers)/config/$(arg robot_type)/gait.info" />
+
     <!-- make the files into global parameters -->
-    <param name="urdfFile" value="/tmp/legged_control/$(arg robot_type).urdf" />
+    <!-- <param name="urdfFile" value="/tmp/legged_control/$(arg robot_type).urdf" />
     <param name="taskFile" value="$(find legged_controllers)/config/$(arg robot_type)/task.info" />
     <param name="referenceFile"
         value="$(find legged_controllers)/config/$(arg robot_type)/reference.info" />
     <param name="gaitCommandFile"
-        value="$(find legged_controllers)/config/$(arg robot_type)/gait.info" />
+        value="$(find legged_controllers)/config/$(arg robot_type)/gait.info" /> -->
+
+    <param name="urdfFile" value="$(arg urdfFile)" type="str" />
+    <param name="taskFile" value="$(arg taskFile)" type="str" />
+    <param name="referenceFile"
+        value="$(arg referenceFile)" type="str" />
+    <param name="gaitCommandFile"
+        value="$(arg gaitCommandFile)" type="str" />
+
 
     <rosparam file="$(find legged_controllers)/config/controllers.yaml" command="load" />
 
@@ -50,14 +65,13 @@
                   controllers/joint_state_controller
                   controllers/legged_controller" />
     </group>
+    <node pkg="legged_controllers" type="legged_target_trajectories_publisher"
+        name="legged_robot_target"
+        output="screen" />
+
+    <!-- <node pkg="legged_body_planner" type="target_trajectories_publisher"
+        name="legged_robot_target" output="screen" /> -->
     <node pkg="ocs2_legged_robot_ros" type="legged_robot_gait_command"
         name="legged_robot_gait_command"
         output="screen" launch-prefix="gnome-terminal --" />
-
-    <!-- <node pkg="legged_controllers" type="legged_target_trajectories_publisher"
-        name="legged_robot_target"
-        output="screen" /> -->
-
-    <node pkg="legged_body_planner" type="target_trajectories_publisher"
-        name="legged_robot_target" output="screen" launch-prefix="gnome-terminal --" />
 </launch>

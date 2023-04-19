@@ -21,6 +21,14 @@
     <!-- Multi-realsense mapping -->
     <arg name="multi_realsense_enabled" default="false" />
 
+    <!-- Robot Params -->
+    <arg name="urdfFile" default="/tmp/legged_control/$(arg robot_type).urdf" />
+    <arg name="taskFile" default="$(find legged_controllers)/config/$(arg robot_type)/task.info" />
+    <arg name="referenceFile"
+        default="$(find legged_controllers)/config/$(arg robot_type)/reference.info" />
+    <arg name="gaitCommandFile"
+        default="$(find legged_controllers)/config/$(arg robot_type)/gait.info" />
+
     <!-- Load robot -->
     <include file="$(find legged_unitree_description)/launch/load_world.launch">
         <arg name="gui" value="$(arg gui)" />
@@ -36,6 +44,10 @@
     <include file="$(find legged_controllers)/launch/load_controller.launch">
         <arg name="spawner" value="$(arg controller_spawner)" />
         <arg name="cheater" value="$(arg cheater)" />
+        <arg name="urdfFile" value="$(arg urdfFile)" />
+        <arg name="taskFile" value="$(arg taskFile)" />
+        <arg name="referenceFile" value="$(arg referenceFile)" />
+        <arg name="gaitCommandFile" value="$(arg gaitCommandFile)" />
     </include>
 
     <!-- No need to publish tf due to leggedHWSim controller..? -->

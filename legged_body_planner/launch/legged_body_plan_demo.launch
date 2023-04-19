@@ -2,15 +2,35 @@
     <!-- Define args -->
     <arg name="robot_type" default="$(env ROBOT_TYPE)" doc="Robot type: [a1, aliengo, go1, laikago]" />
 
-    <!-- Load params -->
-    <param name="taskFile" value="$(find legged_body_planner)/config/$(arg robot_type)/task.info" />
-    <param name="referenceFile"
-        value="$(find legged_body_planner)/config/$(arg robot_type)/reference.info" />
-    <!-- <param name="gaitCommandFile" value="$(find legged_body_planner)/config/$(arg
-    robot_type)/gait.info" /> -->
+    <!-- Robot Params -->
+    <arg name="urdfFile" default="/tmp/legged_control/$(arg robot_type).urdf" />
+    <arg name="taskFile" default="$(find legged_body_planner)/config/$(arg robot_type)/task.info" />
+    <arg name="referenceFile"
+        default="$(find legged_body_planner)/config/$(arg robot_type)/reference.info" />
+    <arg name="gaitCommandFile"
+        default="$(find legged_body_planner)/config/$(arg robot_type)/gait.info" />
+
+    <!-- Rviz & Gazebo Settings -->
+    <arg name="gui" default="false" />
+    <arg name="rviz" default="true" />
+    <arg name="paused" default="false" />
+    <arg name="world" default="worlds/empty.world" />
+
+    <include file="$(find legged_mapping)/launch/legged_robot_demo.launch">
+        <arg name="robot_type" value="$(arg robot_type)" />
+        <arg name="gui" value="$(arg gui)" />
+        <arg name="rviz" value="$(arg rviz)" />
+        <arg name="world" value="$(arg world)" />
+        <arg name="paused" value="$(arg paused)" />
+        <arg name="urdfFile" value="$(arg urdfFile)" />
+        <arg name="taskFile" value="$(arg taskFile)" />
+        <arg name="referenceFile" value="$(arg referenceFile)" />
+        <arg name="gaitCommandFile" value="$(arg gaitCommandFile)" />
+    </include>
 
 
+    <!-- TODO (AZ): Make mapping and planning launch file -->
     <!-- Launch planner -->
-    <node pkg="legged_body_planner" type="target_trajectories_publisher" name="legged_body_plan"
+    <node pkg="legged_body_planner" type="legged_body_planner_node" name="legged_body_planner"
         output="screen" launch-prefix="gnome-terminal --" />
 </launch>
