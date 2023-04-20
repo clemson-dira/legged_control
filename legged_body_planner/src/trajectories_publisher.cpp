@@ -163,7 +163,7 @@ TrajectoriesPublisher::TrajectoriesPublisher(ros::NodeHandle& nh,
         ocs2::vector_array_t state_trajectory(
             2, ocs2::vector_t::Zero(observation.state.size()));
 
-        // State trajectory: x_dot, x, and q's
+        // State trajectory: x_dot, euler_rate, x, euler, and q's
         state_trajectory[0] << ocs2::vector_t::Zero(6), current_pose,
             DEFAULT_JOINT_STATE;
         state_trajectory[1] << ocs2::vector_t::Zero(6), target_pose,

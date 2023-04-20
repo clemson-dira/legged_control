@@ -10,6 +10,8 @@ find_package(catkin REQUIRED COMPONENTS
   angles
   std_msgs
   geometry_msgs
+  ocs2_msgs
+  legged_body_msgs
   legged_common
   legged_estimation
   roscpp
@@ -17,6 +19,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf2
   ocs2_legged_robot_ros
   ocs2_robotic_tools
+  ocs2_ros_interfaces
 )
 
 ## System dependencies are found with CMake's conventions
@@ -50,7 +53,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS angles geometry_msgs legged_common legged_estimation roscpp tf2 std_msgs ocs2_robotic_tools
+  CATKIN_DEPENDS angles geometry_msgs legged_common legged_estimation roscpp tf2 ocs2_robotic_tools ocs2_ros_interfaces std_msgs legged_body_msgs
 #  DEPENDS system_lib
 )
 
@@ -100,6 +103,8 @@ target_link_libraries(target_trajectories_publisher
   ${PROJECT_NAME}
   ${catkin_LIBRARIES}
 )
+
+
 
 #############
 ## Install ##

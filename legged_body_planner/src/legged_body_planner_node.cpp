@@ -1,4 +1,5 @@
 #include "legged_body_planner/legged_body_planner.h"
+#include "legged_body_planner/trajectories_publisher.h"
 
 int main(int argc, char **argv) {
   ros::init(argc, argv, "legged_body_planner_node");
