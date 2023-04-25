@@ -4,6 +4,7 @@
 Header header
 time plan_timestamp
 float64 compute_time
+float64[] times
 State[] states
 Control[] controls
 

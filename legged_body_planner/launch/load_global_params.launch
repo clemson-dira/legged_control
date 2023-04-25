@@ -32,6 +32,6 @@
 
     <!-- Legged Body Plan -->
     <rosparam file="$(find legged_body_planner)/config/legged_body_planner.yaml" command="load" />
-    <rosparam file="$(find legged_body_planner)/config/legged_body_planner_topic.yaml"
+    <rosparam file="$(find legged_body_planner)/config/legged_body_planner_topics.yaml"
         command="load" />
 </launch>

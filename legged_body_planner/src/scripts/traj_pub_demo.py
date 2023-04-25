@@ -77,6 +77,10 @@ def target_pose_talker():
 
 
 def main():
+    if len(sys.argv) <= 1:
+        print(
+            "Please rerun and enter w/ type of publishing mode: 'cmd_vel' OR 'target_pose'")
+        return
     type_pub = sys.argv[1]
     if type_pub == "cmd_vel":
         cmd_vel_talker()

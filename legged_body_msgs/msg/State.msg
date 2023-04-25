@@ -1,3 +1,3 @@
-# A representation of planner states
+# State values
 Header header
-float32[] state
+float32[] value

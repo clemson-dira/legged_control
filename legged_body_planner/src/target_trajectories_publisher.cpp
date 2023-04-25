@@ -36,7 +36,7 @@ vector_t DEFAULT_JOINT_STATES(
   3) Time Horizon: 1s
   4) State Trajectory for quadruped dynamic is order prob in the following
   manner
-    - v_x, v_y, v_z, roll_dot, pitch_dot, yaw_dot, x, y, z, yaw, pitch, roll,
+    - v_x, v_y, v_z, yaw_dot, pitch_dot, roll_dot, x, y, z, yaw, pitch, roll,
   joint angles
 */
 

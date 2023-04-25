@@ -1,4 +1,5 @@
 <launch>
+    <!-- TODO (AZ): Make mapping and planning launch file -->
     <!-- Define args -->
     <arg name="robot_type" default="$(env ROBOT_TYPE)" doc="Robot type: [a1, aliengo, go1, laikago]" />
 
@@ -9,6 +10,11 @@
         default="$(find legged_body_planner)/config/$(arg robot_type)/reference.info" />
     <arg name="gaitCommandFile"
         default="$(find legged_body_planner)/config/$(arg robot_type)/gait.info" />
+
+    <!-- Legged Body Planner Params -->
+    <rosparam file="$(find legged_body_planner)/config/legged_body_planner.yaml" command="load" />
+    <rosparam file="$(find legged_body_planner)/config/legged_body_planner_topics.yaml"
+        command="load" />
 
     <!-- Rviz & Gazebo Settings -->
     <arg name="gui" default="false" />
@@ -29,8 +35,9 @@
     </include>
 
 
-    <!-- TODO (AZ): Make mapping and planning launch file -->
     <!-- Launch planner -->
+    <!-- <node pkg="legged_body_planner" type="target_trajectories_publisher"
+        name="trajectories_publisher" output="screen" /> -->
     <node pkg="legged_body_planner" type="legged_body_planner_node" name="legged_body_planner"
         output="screen" launch-prefix="gnome-terminal --" />
 </launch>

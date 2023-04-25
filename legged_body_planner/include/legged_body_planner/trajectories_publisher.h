@@ -14,6 +14,11 @@
 
 #include <mutex>
 
+#include "legged_body_msgs/Control.h"
+#include "legged_body_msgs/Plan.h"
+#include "legged_body_msgs/State.h"
+#include "legged_body_planner/planning_utils.h"
+
 //! Class that subscribes to topics and publishes the topics as
 //! TargetTrajectories
 /*!
@@ -29,10 +34,13 @@
   - PoseStamped -> TargetTrajectories
   - BodyPlan -> TargetTrajectories
 */
-class TrajectoriesPublisher {  // Ensure this class has no derived class
+class TrajectoriesPublisher {
  public:
   using CmdToTargetTrajectories_t = std::function<ocs2::TargetTrajectories(
       const ocs2::vector_t& cmd, const ocs2::SystemObservation& observation)>;
+  using PlanToTargetTrajectories_t = std::function<ocs2::TargetTrajectories(
+      const legged_body_msgs::Plan::ConstPtr& plan,
+      const ocs2::SystemObservation& observation)>;
 
   /**
    * @brief Construct a new Trajectories Publisher object
@@ -52,7 +60,16 @@ class TrajectoriesPublisher {  // Ensure this class has no derived class
    */
   TrajectoriesPublisher(ros::NodeHandle nh, const std::string topic_prefix,
                         CmdToTargetTrajectories_t goalToTargetTrajectories,
-                        CmdToTargetTrajectories_t cmdVelToTargetTrajectories);
+                        CmdToTargetTrajectories_t cmdVelToTargetTrajectories,
+                        PlanToTargetTrajectories_t planToTargetTrajectories);
+
+  // /**
+  //  * @brief Converts plan to a target trajectories
+  //  * @param plan Legged Body Msg plan
+  //  * @return ocs2::TargetTrajectories TargetTrajectory
+  //  */
+  // ocs2::TargetTrajectories planToTargetTrajectories(
+  //     const legged_body_msgs::Plan::ConstPtr& plan);
 
   /**
    * @brief Primary work function in class. Called in node file for this
@@ -66,6 +83,12 @@ class TrajectoriesPublisher {  // Ensure this class has no derived class
   CmdToTargetTrajectories_t goalToTargetTrajectories_,
       cmdVelToTargeTrajectories_;
 
+  /// @brief Callable object
+  PlanToTargetTrajectories_t planToTargetTrajectories_;
+
+  //   /// @brief Callable object to convert plan to target trajectories
+  //   PlanToTargetTrajectories_t planToTargetTrajectories_;
+
   /// TF2 Buffer
   tf2_ros::Buffer buffer_;
 
@@ -76,7 +99,7 @@ class TrajectoriesPublisher {  // Ensure this class has no derived class
   ros::NodeHandle nh_;
 
   /// Subscribers
-  ros::Subscriber observation_sub_, goal_sub_, cmd_vel_sub_, goal_plan_sub_;
+  ros::Subscriber observation_sub_, goal_sub_, cmd_vel_sub_, body_plan_sub_;
 
   /// Publisher
   std::unique_ptr<ocs2::TargetTrajectoriesRosPublisher>

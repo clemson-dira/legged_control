@@ -2,30 +2,43 @@
 
 LeggedBodyPlanner::LeggedBodyPlanner(ros::NodeHandle& nh,
                                      std::string topic_prefix) {
-  std::cout << "Initialized LeggedBodyPlanner class\n";
+  // std::cout << "Initialized LeggedBodyPlanner class\n";
 
   nh_ = nh;
-
   // Get parameters
-  std::string reference_file, task_file;
-  std::vector<double> goal_state_vector(12);
-  loadROSParam(nh_, "/referenceFile", reference_file);
-  loadROSParam(nh_, "/taskFile", task_file);
-
-  ocs2::loadData::loadCppDataType(reference_file, "comHeight", COM_HEIGHT_);
-  ocs2::loadData::loadCppDataType(task_file, "mpc.timeHorizon", PLAN_HORIZON_);
+  std::string reference_file, task_file, plan_topic, body_plan_topic;
+  std::vector<float> goal_state_vector(12);
+  planning_utils::loadROSParam(nh_, "/referenceFile", reference_file);
+  planning_utils::loadROSParam(nh_, "/taskFile", task_file);
 
   // Load rosparams
-  loadROSParam(nh_, "/legged_body_planner/update_rate", update_rate_);
-  loadROSParam(nh_, "legged_body_planner/dt", dt_);
-  loadROSParam(nh_, "legged_body_planner/goal_state", goal_state_vector);
+  planning_utils::loadROSParam(nh_, "topics/plan", plan_topic);
+  planning_utils::loadROSParam(nh_, "topics/body_plan", body_plan_topic);
+
+  planning_utils::loadROSParam(nh_, "/legged_body_planner/goal_state",
+                               goal_state_vector);
+  planning_utils::loadROSParam(nh, "/legged_body_planner/update_rate",
+                               update_rate_);
+  planning_utils::loadROSParam(nh, "/legged_body_planner/replan", replan_);
+
+  // // Initialize Trajectories Publisher
+  std::cout << "before traj pub" << std::endl;
+  trajectories_publisher_ptr_.reset(
+      new TrajectoriesPublisher(nh, topic_prefix));
+  std::cout << "after traj pub" << std::endl;
+
+  // Initialize planner configuration
+  planner_config_.loadParams(nh);
 
   // Setup publisher and subscribers
+  planning_algorithm_sub_ =
+      nh_.subscribe(plan_topic, 1, &LeggedBodyPlanner::planCallback, this);
 
-  // Fill in goal state information
-  // TODO (AZ) Get start, goal states, terrain info, call planning algorithm
-  // (prob a ROS action server), and then publish to something subscribed by
-  // trajectories_publisher
+  body_plan_pub_ = nh_.advertise<legged_body_msgs::Plan>(body_plan_topic, 1);
+
+  // Set planning parameters
+  first_plan_ = true;
+  retrieved_plan_ = false;
 }
 
 void LeggedBodyPlanner::observerCallback(
@@ -34,21 +47,127 @@ void LeggedBodyPlanner::observerCallback(
   latest_observation_ = ocs2::ros_msg_conversions::readObservationMsg(*msg);
 }
 
-void LeggedBodyPlanner::vectorToRigidBodyState(const std::vector<double>& v,
-                                               legged_body_msgs::State& s) {
-  if (v.size() != 12) {
-    ROS_ERROR("std::vector<double> is incorrect size");
+void LeggedBodyPlanner::planCallback(
+    const legged_body_msgs::Plan::ConstPtr& plan) {
+  // Goal: Subscribes to generic plan and converts to rigid body plan
+  // Assumptions:
+  // - If planner has replan enabled, and if a plan is rececived, then the
+  // following happens:
+  //    - Assumes that plan received is new & valid
+  //    - Clears the original plan
+  //    - Use the plan and convert to rigid body plan
+  ROS_INFO_THROTTLE(1, "Received plan");
+
+  retrieved_plan_ = false;  // Assumes plan has not been retrieved
+  if (first_plan_ || replan_) {
+    // Clear plan
+    body_plan_.times.clear();
+    body_plan_.states.clear();
+    body_plan_.controls.clear();
+
+    // Transfers plan data to body plan data
+    if (!planToRigidBodyPlan(plan, body_plan_, planner_config_)) {
+      // TODO (AZ): Make this more 'productive' later
+      ROS_WARN("Plan to rigid body plan transfer not successful... Warning!");
+      return;
+    }
+    ROS_INFO_THROTTLE(1, "Converted to rigid body plan");
+
+    retrieved_plan_ = true;
   }
-  s.state[0] = v[0];    // x_dot
-  s.state[1] = v[1];    // y_dot
-  s.state[2] = v[2];    // z_dot
-  s.state[3] = v[3];    // yaw_dot
-  s.state[4] = v[4];    // pitch_dot
-  s.state[5] = v[5];    // roll_dot
-  s.state[6] = v[6];    // x
-  s.state[7] = v[7];    // y
-  s.state[8] = v[8];    // z
-  s.state[9] = v[9];    // yaw
-  s.state[10] = v[10];  // pitch
-  s.state[11] = v[11];  // roll
+}
+
+bool LeggedBodyPlanner::planToRigidBodyPlan(
+    const legged_body_msgs::Plan::ConstPtr& plan,
+    legged_body_msgs::Plan& rigid_body_plan,
+    const planning_utils::PlannerConfig& planner_config) {
+  // Following planToRigidBodyPlan assumes that
+  // 1) plan received ATM has no notion of current time observation
+  // 2) plan gets current state information
+  //
+  // TODO (AZ): Address if planner should send tiem component portion in future
+
+  // Check if trajectories have same length
+  if (!planning_utils::checkTrajectoriesAppropriateSize(plan)) {
+    return false;
+  }
+
+  // TODO (AZ): Resize trajectory to corresponding size
+  const std::vector<double> time_trajectories =
+      plan->times;  // Figure out how to make constant w/o triggering
+  const std::vector<legged_body_msgs::State> state_trajectories = plan->states;
+  const std::vector<legged_body_msgs::Control> control_trajectories =
+      plan->controls;
+
+  // Time & State
+  std::size_t N = state_trajectories.size();  // Trajectory length
+  rigid_body_plan.states.resize(N);
+  for (std::size_t i = 0; i < N; i++) {
+    rigid_body_plan.times.push_back(time_trajectories[i] +
+                                    latest_observation_.time);
+
+    // TODO (AZ): How to address observer but in test there is no observer
+    // Either assume planner sends w/ current state observation... or need to
+    // figure out how to incorporate this in test unit
+
+    // if (i == 0) {  // First state get full current state
+    //   std::cout << "Here\n";
+    //   planning_utils::eigenToStdVec(latest_observation_.state.segment<12>(0),
+    //                                 rigid_body_plan.states[i].value);
+    //   std::cout << "After here\n";
+
+    // } else {
+    //   planning_utils::stateToRigidBodyState(state_trajectories[i].value,
+    //                                         rigid_body_plan.states[i].value,
+    //                                         planner_config_);
+    // }
+    planning_utils::stateToRigidBodyState(state_trajectories[i].value,
+                                          rigid_body_plan.states[i].value,
+                                          planner_config_);
+  }
+
+  // Control
+  N = control_trajectories.size();
+  rigid_body_plan.controls.resize(N);
+  for (std::size_t i = 0; i < N; i++) {
+    planning_utils::controlToRigidBodyControl(
+        control_trajectories[i].value, rigid_body_plan.controls[i].value,
+        latest_observation_, planner_config_);
+  }
+  return true;
+}
+
+void LeggedBodyPlanner::publishCurrentPlan() {
+  // Conditions for publishing
+  // 1) Plan has been retrieved
+  // 2) Plan is the first plan OR replan is enabled
+  // 3) Planner has not been terminated (TODO(AZ): Needs to be implemented)
+
+  if (retrieved_plan_ && (first_plan_ || replan_)) {
+    // ROS_INFO_THROTTLE(1, "Publishing Plan");
+    body_plan_pub_.publish(body_plan_);
+    retrieved_plan_ =
+        false;  // Plan has been pub, new plan has not been retrieved
+  }
+  // After publlishing, if plan was first plan, turn to false
+  if (first_plan_) first_plan_ = false;
+}
+
+void LeggedBodyPlanner::spin() {
+  ros::Rate r(update_rate_);
+
+  while (ros::ok()) {
+    // Process callbacks
+    ros::spinOnce();
+
+    // Call planner (TODO (AZ): Add plan class)
+
+    // Publish rigid body plan
+    publishCurrentPlan();
+
+    // Transform body plan to target trajectories
+    trajectories_publisher_ptr_->spin();
+
+    r.sleep();
+  }
 }

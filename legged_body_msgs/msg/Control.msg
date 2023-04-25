@@ -1,3 +1,3 @@
-# A representation of control for system
+# Control values
 Header header
-float32[] control
+float32[] value

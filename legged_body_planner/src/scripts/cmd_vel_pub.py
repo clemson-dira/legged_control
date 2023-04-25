@@ -22,7 +22,7 @@ B = 2*math.pi/period
 rate_mult = 0.01  # Publish rate a factor of the period
 
 rate = rospy.Rate(1/(rate_mult*period))  # Hz
-dt = 1/rate  # Discrete time step
+dt = 1.0*rate_mult*period  # Discrete time step
 
 
 def cmd_vel_talker():
@@ -67,7 +67,12 @@ def target_pose_talker():
 
 
 def main():
+    if len(sys.argv) <= 1:
+        print(
+            "Please rerun and enter w/ type of publishing mode: 'cmd_vel' OR 'target_pose'")
+        return
     type_pub = sys.argv[1]
+
     if type_pub == "cmd_vel":
         cmd_vel_talker()
     elif type_pub == "target_pose":

@@ -22,8 +22,11 @@ find_package(catkin REQUIRED COMPONENTS
   ocs2_ros_interfaces
 )
 
-## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
+
+find_package(Boost REQUIRED COMPONENTS 
+  system
+  filesystem
+  )
 
 
 
@@ -72,6 +75,7 @@ include_directories(
 add_library(${PROJECT_NAME}
   src/legged_body_planner.cpp
   src/trajectories_publisher.cpp
+  src/planning_utils.cpp
 )
 
 ## Add cmake target dependencies of the library
@@ -153,9 +157,16 @@ target_link_libraries(target_trajectories_publisher
 #############
 
 ## Add gtest based cpp test target and link libraries
-catkin_add_gtest(${PROJECT_NAME}-test test/test_legged_body_planner.cpp)
+catkin_add_gtest(${PROJECT_NAME}-test 
+  test/test_legged_body_planner.cpp)
 if(TARGET ${PROJECT_NAME}-test)
   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME} ${catkin_LIBRARIES})
+endif()
+
+catkin_add_gtest(trajectories_publisher-test 
+  test/test_trajectories_publisher.cpp)
+if(TARGET trajectories_publisher-test)
+  target_link_libraries(trajectories_publisher-test ${PROJECT_NAME} ${catkin_LIBRARIES})
 endif()
 
 
