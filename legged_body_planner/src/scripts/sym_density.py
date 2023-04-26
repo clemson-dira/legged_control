@@ -199,7 +199,7 @@ class Density:
         #             f_grad_density_y.append(grad_density_y)
         # return f_grad_density_x, f_grad_density_y
     
-    def get_plan(self,current_t,x0,y0,N,dt,gain):
+    def get_plan(self,current_t,x0,y0,N,dt):
         #forawrd euler
         grad_rho_fn_x, grad_rho_fn_y = self.grad_density()
         rad_from_goal = 0.1
