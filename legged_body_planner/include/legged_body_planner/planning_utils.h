@@ -72,6 +72,11 @@ struct PlannerConfig {
   double PLAN_HORIZON;
   double NUM_STATES;
   double NUM_CONTROLS;
+  double TARGET_ROTATION_VELOCITY;
+  double TARGET_DISPLACEMENT_VELOCITY;
+  double TIME_TO_TARGET;
+  Eigen::Matrix<double, 12, 1>
+      DEFAULT_JOINT_STATES;  // TODO (AZ): Get state dim later
 
   // Planning parameters
   double dt;                             // Discretization of trajectory
@@ -111,7 +116,6 @@ struct PlannerConfig {
           "[LeggedPlanningInterface] Reference file path not found: " +
           reference_file_path.string());
     }
-    ocs2::loadData::loadCppDataType(reference_file, "comHeight", COM_HEIGHT);
 
     boost::filesystem::path task_file_path(task_file);
     if (boost::filesystem::exists(task_file_path)) {
@@ -122,7 +126,15 @@ struct PlannerConfig {
           "[LeggedPlanningInterface] Task file path not found: " +
           reference_file_path.string());
     }
+    ocs2::loadData::loadCppDataType(reference_file, "comHeight", COM_HEIGHT);
+    ocs2::loadData::loadEigenMatrix(reference_file, "defaultJointState",
+                                    DEFAULT_JOINT_STATES);
     ocs2::loadData::loadCppDataType(task_file, "mpc.timeHorizon", PLAN_HORIZON);
+    ocs2::loadData::loadCppDataType(reference_file, "targetRotationVelocity",
+                                    TARGET_ROTATION_VELOCITY);
+    ocs2::loadData::loadCppDataType(reference_file,
+                                    "targetDisplacementVelocity",
+                                    TARGET_DISPLACEMENT_VELOCITY);
   }
 };
 

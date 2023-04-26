@@ -18,7 +18,7 @@ import sys
 
 # Define global parameters
 dt = 1.0
-update_rate = 1.0  # Hz
+update_rate = 20  # Hz
 
 
 class PubBodyPlanDemo:

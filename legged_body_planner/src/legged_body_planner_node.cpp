@@ -12,8 +12,6 @@ int main(int argc, char **argv) {
 
   // TrajectoriesPublisher trajectories_publisher(nh, robot_name);
   // trajectories_publisher.spin();
-  // TODO (AZ): Figure out why not spinning
-  // when
-  //                                 // putting two together
+
   return 0;
 }

@@ -22,10 +22,8 @@ LeggedBodyPlanner::LeggedBodyPlanner(ros::NodeHandle& nh,
   planning_utils::loadROSParam(nh, "/legged_body_planner/replan", replan_);
 
   // // Initialize Trajectories Publisher
-  std::cout << "before traj pub" << std::endl;
   trajectories_publisher_ptr_.reset(
       new TrajectoriesPublisher(nh, topic_prefix));
-  std::cout << "after traj pub" << std::endl;
 
   // Initialize planner configuration
   planner_config_.loadParams(nh);
@@ -105,22 +103,6 @@ bool LeggedBodyPlanner::planToRigidBodyPlan(
   for (std::size_t i = 0; i < N; i++) {
     rigid_body_plan.times.push_back(time_trajectories[i] +
                                     latest_observation_.time);
-
-    // TODO (AZ): How to address observer but in test there is no observer
-    // Either assume planner sends w/ current state observation... or need to
-    // figure out how to incorporate this in test unit
-
-    // if (i == 0) {  // First state get full current state
-    //   std::cout << "Here\n";
-    //   planning_utils::eigenToStdVec(latest_observation_.state.segment<12>(0),
-    //                                 rigid_body_plan.states[i].value);
-    //   std::cout << "After here\n";
-
-    // } else {
-    //   planning_utils::stateToRigidBodyState(state_trajectories[i].value,
-    //                                         rigid_body_plan.states[i].value,
-    //                                         planner_config_);
-    // }
     planning_utils::stateToRigidBodyState(state_trajectories[i].value,
                                           rigid_body_plan.states[i].value,
                                           planner_config_);
@@ -143,8 +125,10 @@ void LeggedBodyPlanner::publishCurrentPlan() {
   // 2) Plan is the first plan OR replan is enabled
   // 3) Planner has not been terminated (TODO(AZ): Needs to be implemented)
 
+  std::cout << "Retrieved plan: " << retrieved_plan_ << std::endl;
+  std::cout << "Replan: " << replan_ << std::endl;
   if (retrieved_plan_ && (first_plan_ || replan_)) {
-    // ROS_INFO_THROTTLE(1, "Publishing Plan");
+    ROS_INFO_THROTTLE(1, "Publishing Plan");
     body_plan_pub_.publish(body_plan_);
     retrieved_plan_ =
         false;  // Plan has been pub, new plan has not been retrieved
@@ -166,7 +150,8 @@ void LeggedBodyPlanner::spin() {
     publishCurrentPlan();
 
     // Transform body plan to target trajectories
-    trajectories_publisher_ptr_->spin();
+    trajectories_publisher_ptr_
+        ->spinOnce();  // TODO (AZ) Stuck in this loop... maybe make it not spin
 
     r.sleep();
   }

@@ -29,6 +29,7 @@
   Topics subscribed:
   - /cmd_vel
   - /move_base/simple/goal
+  - /plan
   ROS msgs conversion:
   - Twist -> TargetTrajectories
   - PoseStamped -> TargetTrajectories
@@ -47,7 +48,7 @@ class TrajectoriesPublisher {
    * @param nh ros nodehandle
    * @param topicPrefix prefix topic
    */
-  TrajectoriesPublisher(ros::NodeHandle& nh, const std::string& topic_prefix);
+  TrajectoriesPublisher(ros::NodeHandle nh, const std::string& topic_prefix);
 
   /**
    * @brief Construct a new Trajectories Publisher object
@@ -58,10 +59,11 @@ class TrajectoriesPublisher {
    * @param cmd_vel_to_target_trajectories Function reference from cmd_vel to
    * target trajectories
    */
-  TrajectoriesPublisher(ros::NodeHandle nh, const std::string topic_prefix,
-                        CmdToTargetTrajectories_t goalToTargetTrajectories,
-                        CmdToTargetTrajectories_t cmdVelToTargetTrajectories,
-                        PlanToTargetTrajectories_t planToTargetTrajectories);
+  TrajectoriesPublisher(
+      ros::NodeHandle& nh, const std::string topic_prefix,
+      CmdToTargetTrajectories_t goalToTargetTrajectories,
+      CmdToTargetTrajectories_t cmdVelToTargetTrajectories/*,
+      PlanToTargetTrajectories_t planToTargetTrajectories*/);
 
   // /**
   //  * @brief Converts plan to a target trajectories
@@ -77,17 +79,89 @@ class TrajectoriesPublisher {
    */
   void spin();
 
+  /**
+   * @brief Secondary work function in class. Spin once option for trajectories
+   * publisher
+   *
+   */
+  void spinOnce();
+
+  /**
+   * @brief Estimate time to target with nominal target velocity
+   * @param pos1 Position 1
+   * @param pos2 Position 2
+   * @return ocs2::scalar_t Return ideal time to target
+   */
+  ocs2::scalar_t estimateTimeToTarget(const ocs2::vector_t& pos1,
+                                      const ocs2::vector_t& pos2);
+
+  /**
+   * @brief Converts pose to target trajectories
+   * @param target_pose Eigen vector of poses
+   * @param observation System Observation
+   * @param target_reaching_time Time to reach target
+   * @return ocs2::TargetTrajectories
+   */
+  ocs2::TargetTrajectories targetPoseToTargetTrajectories(
+      const ocs2::vector_t& target_pose,
+      const ocs2::SystemObservation& observation,
+      const ocs2::scalar_t target_reaching_time);
+
+  /**
+   * @brief Helper function that converts goal to trajectories w/ a fixed
+   * velocity
+   * @param goal Target position
+   * @param observation System observation
+   * @return ocs2::TargetTrajectories Target Trajectories for Legged Robot
+   */
+  ocs2::TargetTrajectories goalToTargetTrajectories(
+      const ocs2::vector_t& goal, const ocs2::SystemObservation& observation);
+
+  /**
+   * @brief Helper function that converts goal to velocity commands
+   * @param cmd_vel Velocity command
+   * @param observation System observation
+   * @return ocs2::TargetTrajectories Target Trajectories for Legged Robot
+   */
+  ocs2::TargetTrajectories cmdVelToTargeTrajectories(
+      const ocs2::vector_t& cmd_vel,
+      const ocs2::SystemObservation& observation);
+
+  /**
+   * @brief Helper function that converts plan msg to Target Trajectories
+   * @param plan Legged Robot Plan msg
+   * @param observation System Observation
+   * @return ocs2::TargetTrajectories Target Trajectories for Legged Robot
+   */
+  ocs2::TargetTrajectories planToTargetTrajectories(
+      const legged_body_msgs::Plan::ConstPtr& plan,
+      const ocs2::SystemObservation& observation);
+
  private:
-  /// @brief Callable objects w/ inputs const vector_t& and const
-  /// SystemObservation& w/ return TargetTrajectories
-  CmdToTargetTrajectories_t goalToTargetTrajectories_,
-      cmdVelToTargeTrajectories_;
+  /**
+   * @brief Observation subscriber
+   * @param msg ocs2 mpc observation msg
+   */
+  void observationCallback(const ocs2_msgs::mpc_observation::ConstPtr& msg);
 
-  /// @brief Callable object
-  PlanToTargetTrajectories_t planToTargetTrajectories_;
+  /**
+   * @brief Subscribes to goal point msgs to convert to target trajectories
+   * @param msg Pose stamped geometry msg for goal location
+   */
+  void goalCallback(const geometry_msgs::PoseStamped::ConstPtr& msg);
 
-  //   /// @brief Callable object to convert plan to target trajectories
-  //   PlanToTargetTrajectories_t planToTargetTrajectories_;
+  /**
+   * @brief Subscribes to cmd_vel and publishes new velocity to target
+   * trajectories
+   * @param msg Twist msg for new location
+   */
+  void cmdVelCallback(const geometry_msgs::Twist::ConstPtr& msg);
+
+  /**
+   * @brief Subscribes to body plan to convert to target trajectories
+   * @param msg
+   */
+  void bodyPlanCallback(const legged_body_msgs::Plan::ConstPtr& msg);
 
   /// TF2 Buffer
   tf2_ros::Buffer buffer_;
@@ -110,6 +184,9 @@ class TrajectoriesPublisher {
 
   /// @brief Observer for states
   ocs2::SystemObservation latest_observation_;
+
+  /// @brief Planner Configuration | TODO (AZ): Delete s.t. not reusing
+  planning_utils::PlannerConfig planner_config_;
 
   /// @brief Update rate for sending and receiving data
   double update_rate_;

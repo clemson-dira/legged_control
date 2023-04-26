@@ -1,13 +1,13 @@
 legged_body_planner:
   frame_id : odom # May delete this
   replan : true # Planner replans
-  update_rate : 50 # Hz
+  update_rate : 20 # Hz
   dt : 0.01 # Time interval of planner
   goal_state : [5.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] # Goal state (xyz_dot, ypr_dot, xyz,ypr)
   num_states: 12 # Number of states in rigid body | Most likely delete later
   num_controls: 12 # Number of controls in rigid body
 
 trajectories_publisher:
-  update_rate: 100 # Hz
+  update_rate: 20 # Hz | Only use in spin()
 
 # TODO (AZ): Bad to mix ROS and their task.info... not sure what to do with this
