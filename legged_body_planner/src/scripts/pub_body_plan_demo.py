@@ -40,13 +40,10 @@ class PubBodyPlanDemo:
         print("Publishing test plan")
         # Get parametesr
         curr_time = rospy.Time()
-        # states_0 = self.state
-        # states_0 = state_0[0:12]
-        # print(len(states_0))
         x0 = self.state[6]
         y0 = self.state[7]
         density_plan = sym_density.density()
-        t, x, u = density_plan.get_plan(curr_time,x0,y0,N,dt)
+        t, X, u = density_plan.get_plan(curr_time,x0,y0,N,dt)
         states = []
         time = []
         for i in range(N):
@@ -56,8 +53,8 @@ class PubBodyPlanDemo:
             roll_dot = 0
             pitch_dot = 0
             yaw_dot = 0
-            x = x[0,i]
-            y = x[1,i]
+            x = X[0,i]
+            y = X[1,i]
             z = 0
             roll = 0
             pitch = 0
@@ -82,10 +79,9 @@ class PubBodyPlanDemo:
             self.pub_body_plan()
             #self.rate.sleep()
 
-
 def main():
     #pub_body_plan_demo = PubBodyPlanDemo(dt, update_rate)
-    pub_body_plan_demo = PubBodyPlanDemo(dt)
+    pub_body_plan_demo = PubBodyPlanDemo(dt, N)
     pub_body_plan_demo.spin()
 
 
