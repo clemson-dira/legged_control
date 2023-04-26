@@ -18,16 +18,9 @@ import sys
 
 
 # Define global parameters
-<<<<<<< HEAD
-dt = 1.0
-update_rate = 20  # Hz
-
-
-=======
 dt = 0.01
 #update_rate = 1.0  # Hz
 N = 5000
->>>>>>> b8b8fb3e3ea139d65f6a10e85787a59c91c202e5
 class PubBodyPlanDemo:
     #def __init__(self, dt, update_rate):
     def __init__(self, dt, update_rate):
