@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 
 import rospy
+import sym_density
 from legged_body_msgs.msg import Plan
 from legged_body_msgs.msg import State
 from legged_body_msgs.msg import Control
@@ -17,14 +18,14 @@ import sys
 
 
 # Define global parameters
-dt = 1.0
-update_rate = 1.0  # Hz
-
-
+dt = 0.01
+#update_rate = 1.0  # Hz
+N = 5000
 class PubBodyPlanDemo:
+    #def __init__(self, dt, update_rate):
     def __init__(self, dt, update_rate):
         rospy.init_node("pub_body_plan_demo", anonymous=True)
-        self.rate = rospy.Rate(update_rate)
+        #self.rate = rospy.Rate(update_rate)
         self.observer_sub = rospy.Subscriber(
             '/legged_robot_mpc_observation', mpc_observation, self.observation_callback)
         self.body_plan_pub = rospy.Publisher('plan', Plan, queue_size=1)
@@ -42,20 +43,36 @@ class PubBodyPlanDemo:
         # states_0 = self.state
         # states_0 = state_0[0:12]
         # print(len(states_0))
-        states_0 = State(value=[0, 0, 0, 0, 0, 0,
-                                0, 0, 0, 0, 0, 0])
-        states_1 = State(value=[0, 0, 0, 0, 0, 0,
-                                0.5, 0, 0, 0, 0, 0])
-        states_2 = State(value=[0, 0, 0, 0, 0, 0,
-                                1.0, 0, 0, 0, 0, 0])
+        x0 = self.state[6]
+        y0 = self.state[7]
+        density_plan = sym_density.density()
+        t, x, u = density_plan.get_plan(curr_time,x0,y0,N,dt)
+        states = []
+        time = []
+        for i in range(N):
+            x_dot = u[0,i]
+            y_dot = u[1,i]
+            z_dot = 0
+            roll_dot = 0
+            pitch_dot = 0
+            yaw_dot = 0
+            x = x[0,i]
+            y = x[1,i]
+            z = 0
+            roll = 0
+            pitch = 0
+            yaw = 0
+            states = states +  State(value=[x_dot, y_dot, z_dot, roll_dot, pitch_dot, yaw_dot, 
+                                            x, y, z, roll, pitch, yaw])
+            time = time + t[i]
         header = std_msgs.msg.Header()
         header.stamp = curr_time
 
         plan_msg = Plan()
         plan_msg.header.stamp = header.stamp
         plan_msg.plan_timestamp = curr_time
-        plan_msg.times = [dt+0.1, 2*dt+0.1, 3*dt+0.1]
-        plan_msg.states = [states_0, states_1, states_2]
+        plan_msg.times = time
+        plan_msg.states = states
         plan_msg.controls = [Control(), Control(), Control()]
         self.body_plan_pub.publish(plan_msg)
 
@@ -63,11 +80,12 @@ class PubBodyPlanDemo:
         print("Spinning")
         while (not rospy.is_shutdown()):
             self.pub_body_plan()
-            self.rate.sleep()
+            #self.rate.sleep()
 
 
 def main():
-    pub_body_plan_demo = PubBodyPlanDemo(dt, update_rate)
+    #pub_body_plan_demo = PubBodyPlanDemo(dt, update_rate)
+    pub_body_plan_demo = PubBodyPlanDemo(dt)
     pub_body_plan_demo.spin()
 
 
