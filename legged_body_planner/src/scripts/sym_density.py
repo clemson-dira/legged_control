@@ -1,3 +1,5 @@
+#! /usr/bin/env python3
+
 # write a class with one method
 # method should take a list of parameters and return a value
 
@@ -17,6 +19,8 @@ class Density:
         obs_center      : list of (x,y) position the center of the obstacle
         goal            : (x,y) position of the goal
         alpha           : tuning parameter for the density function
+        gain            : Control multiplier
+        saturation      : Saturation level for control
         """
         self.r1 = r1
         self.r2 = r2
@@ -206,7 +210,7 @@ class Density:
         #             f_grad_density_y.append(grad_density_y)
         # return f_grad_density_x, f_grad_density_y
 
-    def get_plan(self, current_t, x0, y0, N, dt):
+    def get_plan(self, current_t, x0, y0, N, dt, rad_from_goal):
         # forawrd euler
         grad_rho_fn_x, grad_rho_fn_y = self.grad_density()
         rad_from_goal = 0.1
@@ -221,26 +225,40 @@ class Density:
         x[1] = y0
         t[0, 0] = current_t
         for i in range(1, N):
-            u[0, i-1] = gain*grad_rho_fn_x(x[0, i-1], x[1, i-1])
-            u[1, i-1] = gain*grad_rho_fn_y(x[0, i-1], x[1, i-1])
+            try:
+                u[0, i-1] = gain*grad_rho_fn_x(x[0, i-1], x[1, i-1])
+                u[1, i-1] = gain*grad_rho_fn_y(x[0, i-1], x[1, i-1])
+            except RuntimeWarning:
+                # Evaluated at target point, not in formulation
+                # Turn to zero
+                print("Evaluated at target set... Setting control to 0")
+                u[0, i-1] = 0
+                u[1, i-1] = 0
 
             # check if goal is reached
             dist = np.linalg.norm(np.subtract(x[:, i-1], self.goal))
             if dist < rad_from_goal:
-                # print(dist,'reached goal')
-                u[0, i-1] = 0
-                u[1, i-1] = 0
-                break
+                # LQR Controller
+                K = 0.3162  # LQR gain for single integrator
+                u[0, i-1] = - K*x[0, i-1]
+                u[1, i-1] = - K*x[1, i-1]
+
+                # # Zero Controller
+                # u[0, i-1] = 0
+                # u[1, i-1] = 0
 
             # saturate the control inputs
-            if np.max(u) >= saturation:
+            if np.max(u[:, i-1]) >= saturation:
                # print('saturation')
-                u = (u/np.max(u))*saturation
+                u[:, i-1] = (u[:, i-1]/np.max(u[:, i-1]))*saturation
 
             # propagate the states
             x[0, i] = x[0, i-1] + dt*u[0, i-1]
             x[1, i] = x[1, i-1] + dt*u[1, i-1]
             t[0, i] = t[0, i-1] + dt
+        # add value of u[N] = u[N-1] since we dont compute u[N]
+        # need trajectory length N to be the same for both u and x
+        u[:, -1] = u[:, -2]
         return t, x, u
 
 ########### utility functions ###########################################################
@@ -262,7 +280,8 @@ def main():
     x0 = -2
     y0 = -3
     current_t = 0
-    t, x, u = density.get_plan(current_t, x0, y0, N, dt)
+    rad_from_goal = 0.1
+    t, x, u = density.get_plan(current_t, x0, y0, N, dt, rad_from_goal)
 
     ############################ plots for verificaion ######################################################
     if (plot_density == True):
@@ -285,6 +304,8 @@ def main():
         fig = plt.figure()
         ax = fig.add_subplot(2, 2, 2)
         ax.scatter(x[0, :-2], x[1, :-2])
+        # ax.plot(t, x[0, :-2])
+        # ax.plot(t, x[1,:-2])
         ax.set_xlabel('x')
         ax.set_ylabel('y')
 

@@ -124,8 +124,9 @@ void LeggedBodyPlanner::publishCurrentPlan() {
   // 2) Plan is the first plan OR replan is enabled
   // 3) Planner has not been terminated (TODO(AZ): Needs to be implemented)
 
-  ROS_INFO_THROTTLE(1, "Retrieved plan %d | Replan: %d", retrieved_plan_,
-                    replan_);
+  // ROS_INFO_THROTTLE(2, "Retrieved plan %d | Replan: %d", retrieved_plan_,
+  //                   replan_);
+  ROS_INFO_THROTTLE(2, "Retrieved plan %d", retrieved_plan_);
   if (retrieved_plan_ && (first_plan_ || replan_)) {
     ROS_INFO_THROTTLE(1, "Publishing Plan");
     body_plan_pub_.publish(body_plan_);
