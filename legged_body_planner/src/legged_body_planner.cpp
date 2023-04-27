@@ -80,7 +80,7 @@ bool LeggedBodyPlanner::planToRigidBodyPlan(
     legged_body_msgs::Plan& rigid_body_plan,
     const planning_utils::PlannerConfig& planner_config) {
   // Following planToRigidBodyPlan assumes that
-  // 1) plan received ATM has no notion of current time observation
+  // 1) plan sends time trajectory w/ observer time information
   // 2) plan gets current state information
   //
   // TODO (AZ): Address if planner should send tiem component portion in future
@@ -90,7 +90,6 @@ bool LeggedBodyPlanner::planToRigidBodyPlan(
     return false;
   }
 
-  // TODO (AZ): Resize trajectory to corresponding size
   const std::vector<double> time_trajectories =
       plan->times;  // Figure out how to make constant w/o triggering
   const std::vector<legged_body_msgs::State> state_trajectories = plan->states;
@@ -98,11 +97,11 @@ bool LeggedBodyPlanner::planToRigidBodyPlan(
       plan->controls;
 
   // Time & State
+  // TODO (AZ): Need to see if this is ok here
   std::size_t N = state_trajectories.size();  // Trajectory length
   rigid_body_plan.states.resize(N);
   for (std::size_t i = 0; i < N; i++) {
-    rigid_body_plan.times.push_back(time_trajectories[i] +
-                                    latest_observation_.time);
+    rigid_body_plan.times.push_back(time_trajectories[i]);
     planning_utils::stateToRigidBodyState(state_trajectories[i].value,
                                           rigid_body_plan.states[i].value,
                                           planner_config_);
@@ -125,8 +124,8 @@ void LeggedBodyPlanner::publishCurrentPlan() {
   // 2) Plan is the first plan OR replan is enabled
   // 3) Planner has not been terminated (TODO(AZ): Needs to be implemented)
 
-  std::cout << "Retrieved plan: " << retrieved_plan_ << std::endl;
-  std::cout << "Replan: " << replan_ << std::endl;
+  ROS_INFO_THROTTLE(1, "Retrieved plan %d | Replan: %d", retrieved_plan_,
+                    replan_);
   if (retrieved_plan_ && (first_plan_ || replan_)) {
     ROS_INFO_THROTTLE(1, "Publishing Plan");
     body_plan_pub_.publish(body_plan_);

@@ -29,6 +29,9 @@ devel_isolated/
 .project
 .cproject
 
+# Python stuff
+__pycache__/
+
 # qcreator stuff
 CMakeLists.txt.user
 

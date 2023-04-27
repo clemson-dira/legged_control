@@ -35,7 +35,8 @@ void stateToRigidBodyState(const std::vector<float>& state,
   // TODO (AZ): Enforce if heading angle assumption
 
   // Since rigid body planer is 12 states, resize
-  rigid_body_state.resize(planner_config.NUM_STATES);
+  rigid_body_state.resize(planner_config.NUM_STATES +
+                          planner_config.DEFAULT_JOINT_STATES.size());
 
   // Ensure that when transferring states to rigid body states, do not extend
   // pass rigid body state size

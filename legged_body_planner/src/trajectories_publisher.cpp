@@ -14,9 +14,7 @@ TrajectoriesPublisher::TrajectoriesPublisher(ros::NodeHandle nh,
   target_trajectories_publisher_.reset(
       new ocs2::TargetTrajectoriesRosPublisher(nh, topic_prefix));
 
-  ROS_WARN("Topic prefix %s", topic_prefix.c_str());
-
-  observation_sub_ = nh.subscribe<ocs2_msgs::mpc_observation>(
+  observation_sub_ = nh_.subscribe<ocs2_msgs::mpc_observation>(
       topic_prefix + "_mpc_observation", 1,
       &TrajectoriesPublisher::observationCallback, this);
 
@@ -30,7 +28,7 @@ TrajectoriesPublisher::TrajectoriesPublisher(ros::NodeHandle nh,
   body_plan_sub_ = nh_.subscribe<legged_body_msgs::Plan>(
       body_plan_topic, 1, &TrajectoriesPublisher::bodyPlanCallback, this);
 
-  ROS_WARN("Initialized Trajectories Publisher");
+  ROS_INFO("Initialized Trajectories Publisher");
 };
 
 ocs2::scalar_t TrajectoriesPublisher::estimateTimeToTarget(
@@ -103,9 +101,15 @@ ocs2::TargetTrajectories TrajectoriesPublisher::planToTargetTrajectories(
   // Time
   ocs2::scalar_array_t time_trajectories(plan->times.begin(),
                                          plan->times.end());
+  // std::cout << "Time trajectory: " << time_trajectories[0] << std::endl;
+  // std::cout << time_trajectories[1] << std::endl;
+  // std::cout << time_trajectories[2] << std::endl;
+
+  const int default_joint_states_size =
+      planner_config_.DEFAULT_JOINT_STATES.size();
 
   // States
-  std::size_t N = plan->states.size();
+  std::size_t N = plan->states.size();  // N : # of trajectory
   time_trajectories.resize(N);
   ocs2::vector_array_t state_trajectories(N);
   for (std::size_t i = 0; i < N; i++) {
@@ -113,6 +117,9 @@ ocs2::TargetTrajectories TrajectoriesPublisher::planToTargetTrajectories(
         plan->states[i].value.begin(),
         plan->states[i].value.end());  // Convert to double
     planning_utils::stdVecToEigen(state_val, state_trajectories[i]);
+    state_trajectories[i].segment(planner_config_.NUM_STATES,
+                                  default_joint_states_size) =
+        planner_config_.DEFAULT_JOINT_STATES;  // Add default joint states
   }
 
   // Control
@@ -172,7 +179,6 @@ void TrajectoriesPublisher::observationCallback(
 
 void TrajectoriesPublisher::goalCallback(
     const geometry_msgs::PoseStamped::ConstPtr& msg) {
-  std::cout << "goal callback" << std::endl;
   if (latest_observation_.time == 0) {
     return;
   }
@@ -209,7 +215,6 @@ void TrajectoriesPublisher::goalCallback(
 
 void TrajectoriesPublisher::cmdVelCallback(
     const geometry_msgs::Twist::ConstPtr& msg) {
-  std::cout << "cmdVel Callback" << std::endl;
   if (latest_observation_.time == 0.0) {
     // std::cout << "Latest observation is: " << latest_observation_.time
     //           << std::endl;
@@ -234,7 +239,6 @@ void TrajectoriesPublisher::bodyPlanCallback(
   if (latest_observation_.time == 0.0) {
     return;
   }
-  std::cout << "there" << std::endl;
   const auto trajectories = planToTargetTrajectories(msg, latest_observation_);
   target_trajectories_publisher_->publishTargetTrajectories(trajectories);
 }
