@@ -20,7 +20,7 @@ import sys
 # Define global parameters
 dt = 0.01
 update_rate = 20.0  # Hz
-N = 500
+N = 100
 
 class PubBodyPlanDemo:
     def __init__(self, dt, N, update_rate):
@@ -45,10 +45,11 @@ class PubBodyPlanDemo:
         curr_time = self.curr_time 
         x0 = self.state.value[6]
         y0 = self.state.value[7]
-        density_plan = sym_density.Density()
+        density_plan = sym_density.Density(r1=1,r2=2,obs_center=[2,3],goal=[5,5], alpha=0.2, gain=100, saturation=2)
         t, X, u = density_plan.get_plan(curr_time,x0,y0,self.N,self.dt)
         states = []
         time = []
+        controls = []
         for i in range(N):
             x_dot = u[0,i]
             y_dot = u[1,i]
@@ -62,11 +63,11 @@ class PubBodyPlanDemo:
             roll = 0
             pitch = 0
             yaw = 0
-            print('x: ',x, 'xdot: ', 'y: ',y, x_dot,'ydot: ',y_dot)
-
+            print('x: ',x, 'xdot: ',x_dot, 'y: ',y, x_dot,'ydot: ',y_dot)
             states.append(State(value=[x_dot, y_dot, z_dot, roll_dot, pitch_dot, yaw_dot, 
                                              x, y, z, roll, pitch, yaw]))
             time.append(t[0,i])
+            controls.append(Control())
             
         #print('states',states)
         #print('time',time)
@@ -91,7 +92,7 @@ class PubBodyPlanDemo:
         # print('times',plan_msg.times)
          ## end test code
 
-        plan_msg.controls = [Control(), Control(), Control()]
+        plan_msg.controls = controls
         self.body_plan_pub.publish(plan_msg)
 
     def spin(self):

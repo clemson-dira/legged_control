@@ -8,7 +8,7 @@ import sympy as sp
 from sympy.vector import CoordSys3D
 
 class Density:
-    def __init__(self, r1=1, r2=2, obs_center=[0,0], goal=[5,5], alpha=0.2):
+    def __init__(self, r1=1, r2=2, obs_center=[0,0], goal=[5,5], alpha=0.2, gain=100, saturation=2):
         """
         Inputs: 
         r1              : radius of the obstacle
@@ -22,6 +22,8 @@ class Density:
         self.alpha = alpha
         self.obs_center = obs_center
         self.goal = goal
+        self.gain = gain
+        self.saturation = saturation
 
     def distance_metric(self):
         """
@@ -203,8 +205,9 @@ class Density:
         #forawrd euler
         grad_rho_fn_x, grad_rho_fn_y = self.grad_density()
         rad_from_goal = 0.1
-        saturation = 2
-        gain = 80
+        saturation = self.saturation
+        #gain = 80
+        gain = self.gain
 
         x = np.zeros((2,N))
         u = np.zeros((2,N))
