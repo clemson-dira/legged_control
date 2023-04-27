@@ -149,9 +149,7 @@ void LeggedBodyPlanner::spin() {
     publishCurrentPlan();
 
     // Transform body plan to target trajectories
-    trajectories_publisher_ptr_
-        ->spinOnce();  // TODO (AZ) Stuck in this loop... maybe make it not spin
-
+    trajectories_publisher_ptr_->spinOnce();
     r.sleep();
   }
 }

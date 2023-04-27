@@ -19,9 +19,17 @@ import sys
 
 
 # Define global parameters
+
 dt = 0.1  # Original: 0.01
 update_rate = 1.0  # Hz
 N = 50  # Original : 100
+
+# Density Parameters
+obs_center = [10, 10]
+goal = [5, 5]
+alpha = 0.2
+gain = 100
+saturation = 1
 
 # TODO : Graph the state & control plots & compare matlab... weird controls
 
@@ -49,8 +57,8 @@ class PubBodyPlanDemo:
         curr_time = self.curr_time
         x0 = self.state.value[6]
         y0 = self.state.value[7]
-        density_plan = sym_density.Density(r1=1, r2=2, obs_center=[10, 10], goal=[
-                                           5, 5], alpha=0.2, gain=100, saturation=1)
+        density_plan = sym_density.Density(
+            r1=1, r2=2, obs_center=obs_center, goal=goal, alpha=alpha, gain=gain, saturation=saturation)
         t, X, u = density_plan.get_plan(curr_time, x0, y0, self.N, self.dt)
         states = []
         time = []

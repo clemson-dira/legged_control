@@ -82,7 +82,6 @@ class TrajectoriesPublisher {
   /**
    * @brief Secondary work function in class. Spin once option for trajectories
    * publisher
-   *
    */
   void spinOnce();
 
