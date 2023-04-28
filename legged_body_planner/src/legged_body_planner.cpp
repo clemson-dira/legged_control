@@ -128,7 +128,7 @@ void LeggedBodyPlanner::publishCurrentPlan() {
   //                   replan_);
   ROS_INFO_THROTTLE(2, "Retrieved plan %d", retrieved_plan_);
   if (retrieved_plan_ && (first_plan_ || replan_)) {
-    ROS_INFO_THROTTLE(1, "Publishing Plan");
+    // ROS_INFO_THROTTLE(1, "Publishing Plan");
     body_plan_pub_.publish(body_plan_);
     retrieved_plan_ =
         false;  // Plan has been pub, new plan has not been retrieved

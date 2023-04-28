@@ -8,10 +8,11 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import sympy as sp
 from sympy.vector import CoordSys3D
+import math
 
 
 class Density:
-    def __init__(self, r1=1, r2=2, obs_center=[0, 0], goal=[5, 5], alpha=0.2, gain=100, saturation=2):
+    def __init__(self, r1=1, r2=2, obs_center=[0, 0], goal=[5, 5], alpha=0.2, gain=100, saturation=2, rad_from_goal=0.25):
         """
         Inputs: 
         r1              : radius of the obstacle
@@ -29,6 +30,8 @@ class Density:
         self.goal = goal
         self.gain = gain
         self.saturation = saturation
+        self.terminated = False
+        self.rad_from_goal = rad_from_goal
 
     def distance_metric(self):
         """
@@ -80,7 +83,7 @@ class Density:
 
     def density(self):
         """
-        Form the density function as rho= (1/V^2*alpha)*psi
+        Form the density function as rho= (1/V^(2*alpha))*psi
         Inputs:
         x               : the (x,y) position of the robot
         Outputs:
@@ -210,10 +213,10 @@ class Density:
         #             f_grad_density_y.append(grad_density_y)
         # return f_grad_density_x, f_grad_density_y
 
-    def get_plan(self, current_t, x0, y0, N, dt, rad_from_goal):
+    def get_plan(self, current_t, x0, y0, N, dt):
         # forawrd euler
         grad_rho_fn_x, grad_rho_fn_y = self.grad_density()
-        rad_from_goal = 0.1
+        rad_from_goal = self.rad_from_goal
         saturation = self.saturation
         # gain = 80
         gain = self.gain
@@ -243,6 +246,11 @@ class Density:
                 u[0, i-1] = - K*x[0, i-1]
                 u[1, i-1] = - K*x[1, i-1]
 
+                # if (rad_from_goal - 0.15 > 0 and dist < rad_from_goal - 0.15):
+                #     print("Second layer")
+                #     u[0, i-1] = 0
+                #     u[1, i-1] = 0
+
                 # # Zero Controller
                 # u[0, i-1] = 0
                 # u[1, i-1] = 0
@@ -260,6 +268,41 @@ class Density:
         # need trajectory length N to be the same for both u and x
         u[:, -1] = u[:, -2]
         return t, x, u
+
+    # Utility functions w/in class
+
+    def getYaw(self, curr_vel, prev_yaw=None):
+        """
+        Calculates heading angle given tangent (vel) vectors
+
+        Inputs:
+        -------
+        curr_vel : Current velocity (x_dot, y_dot)
+        prev_yaw : Previous yaw angle
+
+        Output:
+        --------
+        yaw : float
+            Current yaw angle
+        """
+        curr_vel_x = curr_vel[0]
+        curr_vel_y = curr_vel[1]
+        if prev_yaw == None:
+            # print("yaw ref: ", math.atan2(curr_vel_y, curr_vel_x))
+            return math.atan2(curr_vel_y, curr_vel_x)  # Assumes 2d
+        else:
+            wrapped_yaw = math.atan2(curr_vel_y, curr_vel_x)
+            # Assumes yaw rate is 'slow'
+            # print("Diff: ", wrapped_yaw - prev_yaw)
+
+            if (wrapped_yaw - prev_yaw) > math.pi:
+                quotient = int((wrapped_yaw - prev_yaw)/(2*math.pi))
+                wrapped_yaw = wrapped_yaw - math.pi - quotient*(2*math.pi)
+            elif (wrapped_yaw - prev_yaw) < -math.pi:
+                quotient = int((wrapped_yaw - prev_yaw)/(2*math.pi))
+                wrapped_yaw = wrapped_yaw + math.pi - quotient*(2*math.pi)
+        # print("yaw ref: ", math.atan2(curr_vel_y, curr_vel_x))
+        return wrapped_yaw
 
 ########### utility functions ###########################################################
 
@@ -281,7 +324,7 @@ def main():
     y0 = -3
     current_t = 0
     rad_from_goal = 0.1
-    t, x, u = density.get_plan(current_t, x0, y0, N, dt, rad_from_goal)
+    t, x, u = density.get_plan(current_t, x0, y0, N, dt)
 
     ############################ plots for verificaion ######################################################
     if (plot_density == True):
