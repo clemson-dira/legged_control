@@ -235,7 +235,6 @@ void TrajectoriesPublisher::cmdVelCallback(
 
 void TrajectoriesPublisher::bodyPlanCallback(
     const legged_body_msgs::Plan::ConstPtr& msg) {
-  std::cout << "bodyPlan callback" << std::endl;
   if (latest_observation_.time == 0.0) {
     return;
   }

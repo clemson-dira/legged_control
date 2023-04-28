@@ -241,19 +241,26 @@ class Density:
             # check if goal is reached
             dist = np.linalg.norm(np.subtract(x[:, i-1], self.goal))
             if dist < rad_from_goal:
-                # LQR Controller
-                K = 0.3162  # LQR gain for single integrator
-                u[0, i-1] = - K*x[0, i-1]
-                u[1, i-1] = - K*x[1, i-1]
+                # # LQR Controller
+                # K = 0.3162  # LQR gain for single integrator
+                # u[0, i-1] = - K*x[0, i-1]
+                # u[1, i-1] = - K*x[1, i-1]
 
-                # if (rad_from_goal - 0.15 > 0 and dist < rad_from_goal - 0.15):
+                # """
+                # print("rad_from_goal - 0.1 > 0: %d" % (rad_from_goal-0.1 > 0))
+                # print("Dist: ", dist)
+                # print("rad_from_goal - 0.1: %0.2E " % (rad_from_goal - 0.1))
+                # print("dist < rad_from_goal - 0.1: %0.2f" %
+                #       (dist < rad_from_goal - 0.1))
+                # """
+                # if (rad_from_goal - 0.1 >= 0 and dist <= rad_from_goal - 0.1):
                 #     print("Second layer")
                 #     u[0, i-1] = 0
                 #     u[1, i-1] = 0
 
-                # # Zero Controller
-                # u[0, i-1] = 0
-                # u[1, i-1] = 0
+                # Zero Controller
+                u[0, i-1] = 0
+                u[1, i-1] = 0
 
             # saturate the control inputs
             if np.max(u[:, i-1]) >= saturation:
