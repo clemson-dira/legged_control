@@ -30,6 +30,7 @@ class Density:
         self.saturation = saturation
         self.terminated = False
         self.rad_from_goal = rad_from_goal
+        self.N = int(len(obs_center)/2)
 
     def distance_metric(self):
         """
@@ -54,16 +55,18 @@ class Density:
         x, y = sp.symbols('x y')
         R = CoordSys3D('R')
         x_vec = x*R.i + y*R.j
-        obs = self.obs_center[0]*R.i + self.obs_center[1]*R.j
-        obs_dist = sp.sqrt((x_vec-obs).dot(x_vec-obs))
-        shape = (np.subtract(obs_dist**2, self.r1**2)) / \
-            np.subtract(self.r2**2, self.r1**2)
+        inverse_bump = 1
+        for i in range(self.N):
+            obs = self.obs_center[i*self.N]*R.i + self.obs_center[(i*self.N)+1]*R.j
+            obs_dist = sp.sqrt((x_vec-obs).dot(x_vec-obs))
+            shape = (np.subtract(obs_dist**2, self.r1**2)) / \
+                np.subtract(self.r2**2, self.r1**2)
 
-        f = sp.Piecewise((0, shape <= 0), (sp.exp(-1/shape), shape > 0))
-        shape_shift = 1-shape
-        f_shift = sp.Piecewise((0, shape_shift <= 0),
-                               (sp.exp(-1/shape_shift), shape_shift > 0))
-        inverse_bump = f/(f+f_shift)
+            f = sp.Piecewise((0, shape <= 0), (sp.exp(-1/shape), shape > 0))
+            shape_shift = 1-shape
+            f_shift = sp.Piecewise((0, shape_shift <= 0),
+                                (sp.exp(-1/shape_shift), shape_shift > 0))
+            inverse_bump = inverse_bump * (f/(f+f_shift))
         inverse_bump_fn = sp.lambdify([x, y], inverse_bump)
         return inverse_bump, inverse_bump_fn
 
@@ -96,15 +99,18 @@ class Density:
         dist = sp.sqrt((x_vec-goal).dot(x_vec-goal))
 
         # inverse bump function
-        obs = self.obs_center[0]*R.i + self.obs_center[1]*R.j
-        obs_dist = sp.sqrt((x_vec-obs).dot(x_vec-obs))
-        shape = (np.subtract(obs_dist**2, self.r1**2)) / \
-            np.subtract(self.r2**2, self.r1**2)
-        f = sp.Piecewise((0, shape <= 0), (sp.exp(-1/shape), shape > 0))
-        shape_shift = 1-shape
-        f_shift = sp.Piecewise((0, shape_shift <= 0),
-                               (sp.exp(-1/shape_shift), shape_shift > 0))
-        inverse_bump = f/(f+f_shift)
+        inverse_bump = 1
+        for i in range(self.N):
+            obs = self.obs_center[i*self.N]*R.i + self.obs_center[(i*self.N)+1]*R.j
+            obs_dist = sp.sqrt((x_vec-obs).dot(x_vec-obs))
+            shape = (np.subtract(obs_dist**2, self.r1**2)) / \
+                np.subtract(self.r2**2, self.r1**2)
+
+            f = sp.Piecewise((0, shape <= 0), (sp.exp(-1/shape), shape > 0))
+            shape_shift = 1-shape
+            f_shift = sp.Piecewise((0, shape_shift <= 0),
+                                (sp.exp(-1/shape_shift), shape_shift > 0))
+            inverse_bump = inverse_bump * (f/(f+f_shift))
 
         # density function
         rho = 1/(dist**(2*self.alpha))*inverse_bump
@@ -310,8 +316,6 @@ class Density:
         return wrapped_yaw
 
 ########### utility functions ###########################################################
-
-
 def symlog(x):
     """ Returns the symmetric log10 value """
     return np.sign(x) * np.log10(np.abs(x))
@@ -321,12 +325,12 @@ def symlog(x):
 def main():
     plot_density = False
     plot_traj = True
-    density = Density()
+    density = Density(r1=1, r2=2, obs_center=[3, 0.1, 7, -1], goal=[10, 0], alpha=0.2, gain=100, saturation=2, rad_from_goal=0.25)
 
     N = 5000
     dt = 0.01
-    x0 = -2
-    y0 = -3
+    x0 = 0
+    y0 = 0
     current_t = 0
     rad_from_goal = 0.1
     t, x, u = density.get_plan(current_t, x0, y0, N, dt)
