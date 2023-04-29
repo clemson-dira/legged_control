@@ -55,6 +55,9 @@ class PubBodyPlanDemo:
         self.update_rate = rospy.get_param("/density_plan/update_rate")
         self.horizon = rospy.get_param("/density_plan/horizon")
         self.dt = rospy.get_param("/density_plan/dt")
+        self.window_size = rospy.get_param("/density_plan/window_size")
+        self.alpha1 = rospy.get_param("/density_plan/alpha1")
+        self.alpha2 = rospy.get_param("/density_plan/alpha2")
 
         self.rate = rospy.Rate(self.update_rate)
         self.observer_sub = rospy.Subscriber(
@@ -110,16 +113,25 @@ class PubBodyPlanDemo:
             # TODO : Get yaw rate through RK4 or central diff method, or naiive finite diff
 
         # Apply filter
-        yaw_filter_list = self.applyFirstOrderFilter(yaw_list, 0.98)
+        filtered_x_list = self.movingAverageFilter(x_list, self.window_size)
+        filtered_y_list = self.movingAverageFilter(y_list, self.window_size)
+        filtered_x_dot_list = self.movingAverageFilter(
+            x_dot_list, self.window_size)
+        filtered_y_dot_list = self.movingAverageFilter(
+            y_dot_list, self.window_size)
+        filtered_yaw_list = self.applyFirstOrderFilter(yaw_list, self.alpha1)
 
         # Get yaw rate from filter
-        yaw_dot_list = self.centralDiffMethod(yaw_filter_list, self.dt)
-        yaw_dot_filter_list = self.applyFirstOrderFilter(yaw_dot_list, 0.1)
+        yaw_dot_list = self.centralDiffMethod(filtered_yaw_list, self.dt)
+        filtered_yaw_dot_list = self.applyFirstOrderFilter(
+            yaw_dot_list, self.alpha1)
 
         # Add time, state, and control into legged boddy msg format
         for i in range(self.horizon):
-            states.append(State(value=[x_dot_list[i], y_dot_list[i], z_dot_list[i], roll_dot_list[i], pitch_dot_list[i], yaw_dot_filter_list[i],
-                                       x_list[i], y_list[i], z_list[i], yaw_filter_list[i], pitch_list[i], roll_list[i]]))
+            states.append(State(value=[filtered_x_dot_list[i], filtered_y_dot_list[i], z_dot_list[i], roll_dot_list[i],
+                                       pitch_dot_list[i], filtered_yaw_dot_list[i],
+                                       filtered_x_list[i], filtered_y_list[i], z_list[i],
+                                       filtered_yaw_list[i], pitch_list[i], roll_list[i]]))
             time.append(t[0, i])
             controls.append(Control())
 
@@ -243,6 +255,48 @@ class PubBodyPlanDemo:
             state_dot.append(derivative)
 
         return state_dot
+
+    def movingAverageFilter(self, data: list, window_size: int):
+        """
+        Applies a moving average filter to the list 'state'
+
+        Inputs:
+        --------
+        state : list
+            Data to be filtered
+        window_size : int
+            Window size of moving average filter
+        Outputs:
+        --------
+        filtered_data : list
+            Filtered data
+        """
+        filtered_data = [0.0]*len(data)  # Initialize size
+
+        # Ensure window size is odd
+        if (window_size % 2 == 0):
+            window_size = window_size + 1  # Add 1 to window size
+
+        # Symmetric moving average window
+        for i in range(len(data)):  # i: current index
+
+            # Check if window out of range
+            lower_idx_bound = max(0, i - (int)(window_size/2))
+            upper_idx_bound = min(len(data) - 1, i + (int)(window_size/2))
+            # Shrink window if the moving window becomes out of bound
+            new_window_size = min(window_size, abs(lower_idx_bound - i)*2 + 1,
+                                  abs(upper_idx_bound - i)*2 + 1)
+
+            # Average data in window
+            avg_i = 0  # Average at index i
+            lower_window_idx = i - (int)(new_window_size/2)
+            upper_window_idx = i + (int)(new_window_size/2) + 1
+            for j in range(lower_window_idx, upper_window_idx):
+                avg_i += data[j]
+            avg_i = avg_i/new_window_size
+            # print("Filtered data i: ", avg_i)
+            filtered_data[i] = avg_i
+        return filtered_data
 
 
 def main():

@@ -16,10 +16,13 @@ density_plan:
   alpha : 0.2 # Tuning parameter of Lyapunov V(x)
   gain : 25 # Control multiplier
   saturation : 0.5 # Saturation on control
-  rad_from_goal : 0.25 # Execute switching control in problem formulation
+  rad_from_goal : 0.15 # Execute switching control in problem formulation
   update_rate : 10 # Hz | Rate of feedback planner
   horizon : 200 # Horizon of feedback planner
   dt : 0.01 # Discretization of continuous formulation of FB controller
+  window_size : 21 # Moving average filter window
+  alpha1 : 0.98 # First Order filter on states (e.g. yaw)
+  alpha2 : 0.1 # First Order filter on time derivative states (e.g. yaw_dot)
 
 
 # TODO (AZ): Bad to mix ROS and their task.info... not sure how I want to address this

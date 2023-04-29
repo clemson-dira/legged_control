@@ -240,7 +240,7 @@ class Density:
 
             # check if goal is reached
             dist = np.linalg.norm(np.subtract(x[:, i-1], self.goal))
-            if dist < rad_from_goal:
+            if dist <= rad_from_goal:
                 # # LQR Controller
                 # K = 0.3162  # LQR gain for single integrator
                 # u[0, i-1] = - K*x[0, i-1]
