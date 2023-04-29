@@ -16,8 +16,8 @@ import sys
 # Define global parameters
 rospy.init_node('traj_pub_demo', anonymous=True)
 # Parameters
-period = 5  # Desired period [s]
-A = 0.25  # Amplitude
+period = 10  # Desired period [s]
+A = 0.10  # Amplitude
 B = 2*math.pi/period
 rate_mult = 0.01  # Publish rate a factor of the period
 
@@ -63,9 +63,11 @@ def target_pose_talker():
         msg.header.stamp = curr_time
         msg.pose.position.x = A * \
             math.cos(B*(curr_time.to_sec()-start_time.to_sec()))
+        # msg.pose.position.x = 0
         # Move like sine, derivative of sine
-        msg.pose.position.y = A * \
-            math.sin(B*(curr_time.to_sec()-start_time.to_sec()))
+        # msg.pose.position.y = A * \
+        #     math.sin(B*(curr_time.to_sec()-start_time.to_sec()))
+        msg.pose.position.y = 0.0
         msg.pose.position.z = 0.325  # Go1 spec | Doesn't matter
         # RPY 0 0 0 -> Quaternion 1 0 0 0
         msg.pose.orientation.x = 0.0

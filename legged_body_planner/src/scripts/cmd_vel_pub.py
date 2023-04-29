@@ -44,7 +44,7 @@ def cmd_vel_talker():
 
 def target_pose_talker():
     print("Running target position mode w/ fixed vel")
-    pub = rospy.Publisher('/move_base_simple/goal')
+    pub = rospy.Publisher('/move_base_simple/goal', PoseStamped, queue_size=1)
     msg = PoseStamped()
 
     target_displacement_vel = 0.5  # TODO (AZ): Read from .info files
