@@ -90,7 +90,7 @@ TEST(TestLeggedBodyPlanner, PublishStatesToRigidBodyStates) {
 }
 
 int main(int argc, char** argv) {
-  testing::InitGoogleTest(&argc, argv);  // &argc is the memory address of argc
+  testing::InitGoogleTest(&argc, argv);
   ros::init(argc, argv, "legged_body_planner_tester");
   return RUN_ALL_TESTS();
 }

@@ -1,7 +1,5 @@
 #! /usr/bin/env python3
 
-# write a class with one method
-# method should take a list of parameters and return a value
 
 import numpy as np
 import matplotlib.pyplot as plt
