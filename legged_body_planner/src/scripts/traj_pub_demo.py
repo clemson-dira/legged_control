@@ -17,11 +17,12 @@ import sys
 rospy.init_node('traj_pub_demo', anonymous=True)
 # Parameters
 period = 10  # Desired period [s]
-A = 0.10  # Amplitude
+A = 1  # Amplitude
 B = 2*math.pi/period
 rate_mult = 0.01  # Publish rate a factor of the period
 
-rate = rospy.Rate(1/(rate_mult*period))  # Hz
+# rate = rospy.Rate(1/(rate_mult*period))  # Hz
+rate = rospy.Rate(0.1)
 dt = rate_mult*period  # Discrete time step
 
 
@@ -34,7 +35,7 @@ def cmd_vel_talker():
         curr_time = rospy.Time.now()
         msg.linear.x = 0.0
         msg.linear.y = A*math.sin(B*(curr_time.to_sec() - start_time.to_sec()))
-        msg.linear.z = 0.325  # Go1 spec | Don't think this matters because does not use this info
+        msg.linear.z = 0
         msg.angular.x = 0
         msg.angular.y = 0
         msg.angular.z = 0

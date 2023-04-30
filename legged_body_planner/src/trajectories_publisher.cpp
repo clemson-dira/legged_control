@@ -146,7 +146,7 @@ ocs2::TargetTrajectories TrajectoriesPublisher::cmdVelToTargeTrajectories(
       current_pose.tail(3);  // YPR of euler angles
   ocs2::vector_t cmd_vel_rot = ocs2::getRotationMatrixFromZyxEulerAngles(ypr) *
                                cmd_vel.head(3);  // cmd vel w.r.t. body frame
-  const ocs2::scalar_t time_to_target = planner_config_.TIME_TO_TARGET;
+  const ocs2::scalar_t time_to_target = planner_config_.PLAN_HORIZON;
 
   // Define target pose
   ocs2::vector_t target(6);
@@ -158,6 +158,8 @@ ocs2::TargetTrajectories TrajectoriesPublisher::cmdVelToTargeTrajectories(
   target(5) = 0;
 
   const ocs2::vector_t target_pose = target;
+
+  std::cout << "target_pose: \n" << target_pose << std::endl;
 
   // Target reaching time
   const ocs2::scalar_t target_reaching_time =
