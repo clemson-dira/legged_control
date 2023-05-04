@@ -94,8 +94,8 @@ struct PlannerConfig {
 
  private:
   void loadParamsFromServer(ros::NodeHandle& nh) {
-    planning_utils::loadROSParam(nh, "/referenceFile", reference_file);
-    planning_utils::loadROSParam(nh, "/taskFile", task_file);
+    planning_utils::loadROSParam(nh, "/planReferenceFile", reference_file);
+    planning_utils::loadROSParam(nh, "/planTaskFile", task_file);
     planning_utils::loadROSParam(nh, "/legged_body_planner/dt", dt);
     planning_utils::loadROSParam(nh, "/legged_body_planner/goal_state",
                                  goal_state_vector);

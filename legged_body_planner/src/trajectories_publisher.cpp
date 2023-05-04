@@ -159,8 +159,6 @@ ocs2::TargetTrajectories TrajectoriesPublisher::cmdVelToTargeTrajectories(
 
   const ocs2::vector_t target_pose = target;
 
-  std::cout << "target_pose: \n" << target_pose << std::endl;
-
   // Target reaching time
   const ocs2::scalar_t target_reaching_time =
       observation.time + time_to_target;  // Fixed time

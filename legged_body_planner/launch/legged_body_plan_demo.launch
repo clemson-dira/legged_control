@@ -5,11 +5,14 @@
 
     <!-- Robot Params -->
     <arg name="urdfFile" default="/tmp/legged_control/$(arg robot_type).urdf" />
-    <arg name="taskFile" default="$(find legged_body_planner)/config/$(arg robot_type)/task.info" />
-    <arg name="referenceFile"
+    <arg name="planTaskFile"
+        default="$(find legged_body_planner)/config/$(arg robot_type)/task.info" />
+    <arg name="planReferenceFile"
         default="$(find legged_body_planner)/config/$(arg robot_type)/reference.info" />
-    <arg name="gaitCommandFile"
-        default="$(find legged_body_planner)/config/$(arg robot_type)/gait.info" />
+
+    <param name="planTaskFile" value="$(arg planTaskFile)" type="str" />
+    <param name="planReferenceFile"
+        value="$(arg planReferenceFile)" type="str" />
 
     <!-- Legged Body Planner Params -->
     <rosparam file="$(find legged_body_planner)/config/legged_body_planner.yaml" command="load" />
@@ -29,9 +32,6 @@
         <arg name="world" value="$(arg world)" />
         <arg name="paused" value="$(arg paused)" />
         <arg name="urdfFile" value="$(arg urdfFile)" />
-        <arg name="taskFile" value="$(arg taskFile)" />
-        <arg name="referenceFile" value="$(arg referenceFile)" />
-        <arg name="gaitCommandFile" value="$(arg gaitCommandFile)" />
     </include>
 
 

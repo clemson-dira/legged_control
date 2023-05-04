@@ -22,11 +22,11 @@
 
     <rosparam file="$(find legged_gazebo)/config/default.yaml" command="load" />
     <param name="urdfFile" value="/tmp/legged_control/$(arg robot_type).urdf" />
-    <param name="taskFile" value="$(find legged_body_planner)/config/$(arg robot_type)/task.info" />
-    <param name="referenceFile"
+    <param name="planTaskFile"
+        value="$(find legged_body_planner)/config/$(arg robot_type)/task.info" />
+    <param name="planReferenceFile"
         value="$(find legged_body_planner)/config/$(arg robot_type)/reference.info" />
-    <param name="gaitCommandFile"
-        value="$(find legged_body_planner)/config/$(arg robot_type)/gait.info" />
+
 
     <!-- <rosparam file="$(find legged_controllers)/config/controllers.yaml" command="load" /> -->
 

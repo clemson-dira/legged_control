@@ -98,7 +98,6 @@ class PubBodyPlanDemo:
             z_dot_list.append(0)
             roll_dot_list.append(0)
             pitch_dot_list.append(0)
-            # yaw_dot_list.append(0)
             x_list.append(X[0, i])
             y_list.append(X[1, i])
             z_list.append(0)
@@ -106,13 +105,13 @@ class PubBodyPlanDemo:
             pitch_list.append(0)
 
             # Lift to full states
-            if i == 0:
-                yaw_list.append(self.getYaw(
-                    [x_dot_list[-1], y_dot_list[-1]]))
-            else:
-                yaw_list.append(self.getYaw(
-                    [x_dot_list[-1], y_dot_list[-1]], yaw_list[-1]))
-            # TODO : Get yaw rate through RK4 or central diff method, or naiive finite diff
+            # if i == 0:
+            #     yaw_list.append(self.getYaw(
+            #         [x_dot_list[-1], y_dot_list[-1]]))
+            # else:
+            #     yaw_list.append(self.getYaw(
+            #         [x_dot_list[-1], y_dot_list[-1]], yaw_list[-1]))
+            yaw_list.append(0)
 
         # Apply filter
         filtered_x_list = self.movingAverageFilter(x_list, self.window_size)
