@@ -9,6 +9,7 @@
 #include <ocs2_msgs/mpc_observation.h>
 #include <ocs2_ros_interfaces/common/RosMsgConversions.h>
 #include <ros/ros.h>
+#include <std_msgs/Bool.h>
 
 #include <mutex>
 
@@ -69,6 +70,12 @@ class LeggedBodyPlanner {
    * @param plan Msg from generic planner
    */
   void planCallback(const legged_body_msgs::Plan::ConstPtr& plan);
+
+  /**
+   * @brief Message to terminate plan
+   * @param msg Boolean msg to terminate plan
+   */
+  void terminatePlanCallback(const std_msgs::Bool::ConstPtr& msg);
 
   /**
    * @brief Terrain callback (TODO (AZ): probably a service)

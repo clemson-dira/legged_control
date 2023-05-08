@@ -57,7 +57,8 @@ class Density:
         x_vec = x*R.i + y*R.j
         inverse_bump = 1
         for i in range(self.N):
-            obs = self.obs_center[i*self.N]*R.i + self.obs_center[(i*self.N)+1]*R.j
+            obs = self.obs_center[i*self.N]*R.i + \
+                self.obs_center[(i*self.N)+1]*R.j
             obs_dist = sp.sqrt((x_vec-obs).dot(x_vec-obs))
             shape = (np.subtract(obs_dist**2, self.r1**2)) / \
                 np.subtract(self.r2**2, self.r1**2)
@@ -65,7 +66,7 @@ class Density:
             f = sp.Piecewise((0, shape <= 0), (sp.exp(-1/shape), shape > 0))
             shape_shift = 1-shape
             f_shift = sp.Piecewise((0, shape_shift <= 0),
-                                (sp.exp(-1/shape_shift), shape_shift > 0))
+                                   (sp.exp(-1/shape_shift), shape_shift > 0))
             inverse_bump = inverse_bump * (f/(f+f_shift))
         inverse_bump_fn = sp.lambdify([x, y], inverse_bump)
         return inverse_bump, inverse_bump_fn
@@ -101,7 +102,8 @@ class Density:
         # inverse bump function
         inverse_bump = 1
         for i in range(self.N):
-            obs = self.obs_center[i*self.N]*R.i + self.obs_center[(i*self.N)+1]*R.j
+            obs = self.obs_center[i*self.N]*R.i + \
+                self.obs_center[(i*self.N)+1]*R.j
             obs_dist = sp.sqrt((x_vec-obs).dot(x_vec-obs))
             shape = (np.subtract(obs_dist**2, self.r1**2)) / \
                 np.subtract(self.r2**2, self.r1**2)
@@ -109,7 +111,7 @@ class Density:
             f = sp.Piecewise((0, shape <= 0), (sp.exp(-1/shape), shape > 0))
             shape_shift = 1-shape
             f_shift = sp.Piecewise((0, shape_shift <= 0),
-                                (sp.exp(-1/shape_shift), shape_shift > 0))
+                                   (sp.exp(-1/shape_shift), shape_shift > 0))
             inverse_bump = inverse_bump * (f/(f+f_shift))
 
         # density function
@@ -316,6 +318,8 @@ class Density:
         return wrapped_yaw
 
 ########### utility functions ###########################################################
+
+
 def symlog(x):
     """ Returns the symmetric log10 value """
     return np.sign(x) * np.log10(np.abs(x))
@@ -323,11 +327,12 @@ def symlog(x):
 
 ###################### main function ####################################################
 def main():
-    plot_density = False
+    plot_density = True
     plot_traj = True
-    density = Density(r1=1, r2=2, obs_center=[3, 0.1, 7, -1], goal=[10, 0], alpha=0.2, gain=100, saturation=2, rad_from_goal=0.25)
+    density = Density(r1=0.5, r2=1.25, obs_center=[1.5, 0.1, 3.5, -2], goal=[
+                      5.0, 0], alpha=0.2, gain=10, saturation=0.1, rad_from_goal=0.15)
 
-    N = 5000
+    N = 10000
     dt = 0.01
     x0 = 0
     y0 = 0
@@ -335,6 +340,11 @@ def main():
     rad_from_goal = 0.1
     t, x, u = density.get_plan(current_t, x0, y0, N, dt)
 
+    # print("Time trajectory size: ", np.shape(t))
+    # print("State trajectory size: ", np.shape(x))
+    # print("t shape: ", np.shape(t[0, :-2]))
+    # print("x0: ", np.shape(x[1, :-2]))
+    fig = plt.figure()
     ############################ plots for verificaion ######################################################
     if (plot_density == True):
         # surface plot of f_density
@@ -342,7 +352,6 @@ def main():
         Y = np.linspace(-10, 10, 100)
         f_distance = density.eval_density(X, Y)
 
-        fig = plt.figure()
         X, Y = np.meshgrid(X, Y)
         ax = fig.add_subplot(2, 2, 1, projection='3d')
         Z = np.array(f_distance).reshape(100, 100)
@@ -353,14 +362,28 @@ def main():
         fig.colorbar(surf1, shrink=0.5, aspect=5)
 
     if (plot_traj == True):
-        fig = plt.figure()
         ax = fig.add_subplot(2, 2, 2)
         ax.scatter(x[0, :-2], x[1, :-2])
         # ax.plot(t, x[0, :-2])
         # ax.plot(t, x[1,:-2])
         ax.set_xlabel('x')
         ax.set_ylabel('y')
+        ax.set_title("Environment")
 
+        ax = fig.add_subplot(2, 2, 3)
+        ax.plot(t[0, :-2], x[0, :-2], label='x')
+        ax.plot(t[0, :-2], x[1, :-2], label='y')
+        ax.set_xlabel('time [s]')
+        ax.set_ylabel("Position")
+        ax.legend()
+        ax.set_title("State Trajectory")
+
+        ax = fig.add_subplot(2, 2, 4)
+        ax.plot(t[0, :-2], u[0, :-2], label='v_x')
+        ax.plot(t[0, :-2], u[1, :-2], label='v_y')
+        ax.set_xlabel('time [s]')
+        ax.set_title('Control Trajectory')
+        ax.legend()
         plt.show()
 
 

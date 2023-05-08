@@ -24,6 +24,7 @@
     <arg name="rviz" default="true" />
     <arg name="paused" default="false" />
     <arg name="world" default="worlds/empty.world" />
+    <arg name="live_plot" default="false" />
 
     <include file="$(find legged_mapping)/launch/legged_robot_demo.launch">
         <arg name="robot_type" value="$(arg robot_type)" />
@@ -40,4 +41,10 @@
         name="trajectories_publisher" output="screen" /> -->
     <node pkg="legged_body_planner" type="legged_body_planner_node" name="legged_body_planner"
         output="screen" launch-prefix="gnome-terminal --" />
+
+    <group if="$(arg live_plot)">
+        <include file="$(find legged_body_planner)/launch/visualization.launch">
+            <arg name="live_plot" value="$(arg live_plot)" />
+        </include>
+    </group>
 </launch>

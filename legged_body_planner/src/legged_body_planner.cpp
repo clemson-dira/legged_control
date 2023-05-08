@@ -6,7 +6,8 @@ LeggedBodyPlanner::LeggedBodyPlanner(ros::NodeHandle& nh,
 
   nh_ = nh;
   // Get parameters
-  std::string reference_file, task_file, plan_topic, body_plan_topic;
+  std::string reference_file, task_file, plan_topic, body_plan_topic,
+      plan_terminate_topic;
   std::vector<float> goal_state_vector(12);
   planning_utils::loadROSParam(nh_, "/referenceFile", reference_file);
   planning_utils::loadROSParam(nh_, "/taskFile", task_file);
@@ -14,6 +15,8 @@ LeggedBodyPlanner::LeggedBodyPlanner(ros::NodeHandle& nh,
   // Load rosparams
   planning_utils::loadROSParam(nh_, "topics/plan", plan_topic);
   planning_utils::loadROSParam(nh_, "topics/body_plan", body_plan_topic);
+  planning_utils::loadROSParam(nh_, "topics/plan_terminate",
+                               plan_terminate_topic);  // TODO (AZ): Use this
 
   planning_utils::loadROSParam(nh_, "/legged_body_planner/goal_state",
                                goal_state_vector);
@@ -36,6 +39,7 @@ LeggedBodyPlanner::LeggedBodyPlanner(ros::NodeHandle& nh,
 
   // Set planning parameters
   first_plan_ = true;
+  terminate_planner_ = false;
   retrieved_plan_ = false;
 }
 
@@ -82,8 +86,6 @@ bool LeggedBodyPlanner::planToRigidBodyPlan(
   // Following planToRigidBodyPlan assumes that
   // 1) plan sends time trajectory w/ observer time information
   // 2) plan gets current state information
-  //
-  // TODO (AZ): Address if planner should send tiem component portion in future
 
   // Check if trajectories have same length
   if (!planning_utils::checkTrajectoriesAppropriateSize(plan)) {
@@ -127,7 +129,7 @@ void LeggedBodyPlanner::publishCurrentPlan() {
   // ROS_INFO_THROTTLE(2, "Retrieved plan %d | Replan: %d", retrieved_plan_,
   //                   replan_);
   ROS_INFO_THROTTLE(2, "Retrieved plan %d", retrieved_plan_);
-  if (retrieved_plan_ && (first_plan_ || replan_)) {
+  if (retrieved_plan_ && (first_plan_ || replan_) && !terminate_planner_) {
     // ROS_INFO_THROTTLE(1, "Publishing Plan");
     body_plan_pub_.publish(body_plan_);
     retrieved_plan_ =

@@ -19,7 +19,7 @@ swing_trajectory_config
 {
   liftOffVelocity               0.05
   touchDownVelocity            -0.1
-  swingHeight                   0.08
+  swingHeight                   0.09 ; Unitree Go1 Spec
   swingTimeScale                0.15
 }
 
@@ -154,7 +154,7 @@ initialState
    ;; Base Pose: [position, orientation] ;;
    (6,0)  0.0     ; p_base_x
    (7,0)  0.0     ; p_base_y
-   (8,0)  0.325     ; p_base_z
+   (8,0)  0.31     ; p_base_z | Unitree Go1 Default: 0.31m
    (9,0)  0.0     ; theta_base_z
    (10,0) 0.0     ; theta_base_y
    (11,0) 0.0     ; theta_base_x
