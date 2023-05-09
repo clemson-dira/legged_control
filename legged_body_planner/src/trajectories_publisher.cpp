@@ -56,8 +56,8 @@ ocs2::TargetTrajectories TrajectoriesPublisher::targetPoseToTargetTrajectories(
   // Desired state trajecotry
   ocs2::vector_t current_pose = observation.state.segment<6>(6);  // x,y,z,y,p,r
   current_pose(2) = planner_config_.COM_HEIGHT;
-  current_pose(4) = 0;
-  current_pose(5) = 0;
+  current_pose(4) = 0;  // pitch
+  current_pose(5) = 0;  // roll
 
   // Create std::vector to contain initial and final state trajectory
   ocs2::vector_array_t state_trajectory(

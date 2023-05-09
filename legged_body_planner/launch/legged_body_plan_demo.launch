@@ -65,7 +65,7 @@
         output="screen" launch-prefix="gnome-terminal --" />
 
     <group if="$(arg live_plot)">
-        <include file="$(find legged_body_planner)/launch/visualization.launch">
+        <include file="$(find legged_body_utils)/launch/visualization.launch">
             <arg name="live_plot" value="$(arg live_plot)" />
         </include>
     </group>
