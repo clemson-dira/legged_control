@@ -1,7 +1,9 @@
 <launch>
     <!-- Define args -->
     <arg name="robot_type" default="$(env ROBOT_TYPE)" doc="Robot type: [a1, aliengo, go1, laikago]" />
-    <arg name="robot_spawn" default="-x 0.0 -y 0.0 -z 0.5 -Y 0.0" />
+    <arg name="robot_spawn" default="-x 6 -y 1 -z 1.0 -Y 3.1415" />
+    <arg name="world_description"
+        default="$(find xacro)/xacro --inorder '$(find ICRA2023_Quadruped_Competition)/urdf/innermap.urdf.xacro'" />
 
     <!-- Robot Params -->
     <arg name="urdfFile" default="/tmp/legged_control/$(arg robot_type).urdf" />
@@ -25,7 +27,8 @@
     <arg name="rviz" default="true" />
     <arg name="rviz_config" default="$(find legged_mapping)/rviz/legged_mapping.rviz" />
     <arg name="paused" default="false" />
-    <arg name="world" default="worlds/empty.world" />
+    <arg name="verbose" default="false" />
+    <arg name="world_name" default="worlds/empty.world" />
     <arg name="live_plot" default="false" />
 
     <!-- Multi-realsense mapping -->
@@ -41,6 +44,17 @@
         <arg name="robot_type" value="$(arg robot_type)" />
         <arg name="paused" value="$(arg paused)" />
     </include>
+
+    <group ns="competition_map">
+        <!-- Load the URDF into the ROS Parameter Server -->
+        <param name="robot_description"
+            command="$(arg world_description)" />
+
+
+        <!-- Run a python script to the send a service call to gazebo_ros to spawn a URDF robot -->
+        <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model"
+            args="-urdf -param robot_description -model competition_map" />
+    </group>
 
     <!-- Load controller -->
     <include file="$(find legged_controllers)/launch/load_controller.launch">

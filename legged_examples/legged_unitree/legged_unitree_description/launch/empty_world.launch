@@ -1,25 +1,9 @@
 <launch>
-   <arg name="robot_type" default="$(env ROBOT_TYPE)" doc="Robot type: [a1, aliengo, go1, laikago]" />
    <arg name="paused" default="false" />
-   <arg name="rviz" default="false" />
    <arg name="gui" default="true" />
    <arg name="world_name" default="$(find legged_gazebo)/worlds/empty_world.world" />
-
-   <group if="$(eval arg('robot_type') == 'go1')">
-      <!-- Go1 Version -->
-      <param name="legged_robot_description"
-         command="$(find xacro)/xacro $(find legged_unitree_description)/urdf/go1/robot.xacro
-      robot_type:=$(arg robot_type)" />
-      <node name="generate_urdf" pkg="legged_common" type="generate_urdf.sh" output="screen"
-         args="$(find legged_unitree_description)/urdf/go1/robot.xacro $(arg robot_type)" />
-   </group>
-   <group unless="$(eval arg('robot_type') == 'go1')">
-      <param name="legged_robot_description"
-         command="$(find xacro)/xacro $(find legged_unitree_description)/urdf/robot.xacro
-      robot_type:=$(arg robot_type)" />
-      <node name="generate_urdf" pkg="legged_common" type="generate_urdf.sh" output="screen"
-         args="$(find legged_unitree_description)/urdf/robot.xacro $(arg robot_type)" />
-   </group>
+   <arg name="verbose" default="false" />
+   <arg name="use_sim_time" default="true" />
 
 
    <rosparam file="$(find legged_gazebo)/config/default.yaml" command="load" />
@@ -29,15 +13,7 @@
       <arg name="paused" value="$(arg paused)" />
       <arg name="gui" value="$(arg gui)" />
       <arg name="world_name" value="$(arg world_name)" />
+      <arg name="verbose" value="$(arg verbose)" />
+      <arg name="use_sim_time" value="$(arg use_sim_time)" />
    </include>
-
-   <!-- push robot_description to factory and spawn robot in gazebo -->
-   <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" clear_params="true"
-      args="-z 0.5 -param legged_robot_description -urdf -model $(arg robot_type)" output="screen" />
-
-
-   <group if="$(arg rviz)">
-      <node pkg="rviz" type="rviz" name="rviz" respawn="false" output="screen"
-         args="-d $(find legged_unitree_description)/launch/rviz_config.rviz" />
-   </group>
 </launch>
