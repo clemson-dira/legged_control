@@ -1,5 +1,5 @@
 # legged_control
-
+...
 ## Introduction
 
 legged_control is an NMPC-WBC legged robot control stack and framework based
