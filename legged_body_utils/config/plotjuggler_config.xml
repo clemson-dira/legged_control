@@ -3,34 +3,34 @@
  <tabbed_widget name="Main Window" parent="main_window">
   <Tab tab_name="Position" containers="1">
    <Container>
-    <DockSplitter orientation="-" count="2" sizes="0.5;0.5">
-     <DockSplitter orientation="|" count="2" sizes="0.5;0.5">
+    <DockSplitter sizes="0.5;0.5" count="2" orientation="-">
+     <DockSplitter sizes="0.5;0.5" count="2" orientation="|">
       <DockArea name="Observed Position">
-       <plot mode="TimeSeries" style="Lines" flip_y="false" flip_x="false">
-        <range bottom="-0.044226" left="110.489000" right="115.490000" top="0.315338"/>
+       <plot flip_x="false" style="Lines" flip_y="false" mode="TimeSeries">
+        <range bottom="-0.070421" right="70.328000" left="65.328000" top="0.728541"/>
         <limitY/>
-        <curve name="Observed x" color="#ff7f0e"/>
-        <curve name="Observed y" color="#f14cc1"/>
-        <curve name="Observed z" color="#9467bd"/>
+        <curve color="#ff7f0e" name="Observed x"/>
+        <curve color="#f14cc1" name="Observed y"/>
+        <curve color="#9467bd" name="Observed z"/>
        </plot>
       </DockArea>
       <DockArea name="Ground Truth Position">
-       <plot mode="TimeSeries" style="Lines" flip_y="false" flip_x="false">
-        <range bottom="-5.742665" left="110.489000" right="115.490000" top="0.451536"/>
+       <plot flip_x="false" style="Lines" flip_y="false" mode="TimeSeries">
+        <range bottom="-0.091058" right="70.328000" left="65.328000" top="0.610678"/>
         <limitY/>
-        <curve name="/ground_truth/state/pose/pose/position/x" color="#17becf"/>
-        <curve name="/ground_truth/state/pose/pose/position/y" color="#bcbd22"/>
-        <curve name="/ground_truth/state/pose/pose/position/z" color="#1f77b4"/>
+        <curve color="#ff7f0e" name="/ground_truth/state/pose/pose/position/x"/>
+        <curve color="#f14cc1" name="/ground_truth/state/pose/pose/position/y"/>
+        <curve color="#9467bd" name="/ground_truth/state/pose/pose/position/z"/>
        </plot>
       </DockArea>
      </DockSplitter>
      <DockArea name="Positional Error">
-      <plot mode="TimeSeries" style="Lines" flip_y="false" flip_x="false">
-       <range bottom="-0.142322" left="110.489000" right="115.490000" top="5.699164"/>
+      <plot flip_x="false" style="Lines" flip_y="false" mode="TimeSeries">
+       <range bottom="-0.026830" right="70.328000" left="65.328000" top="0.122305"/>
        <limitY/>
-       <curve name="Error Position x" color="#d62728"/>
-       <curve name="Error Position y" color="#1ac938"/>
-       <curve name="Error position z" color="#ff7f0e"/>
+       <curve color="#d62728" name="Error Position x"/>
+       <curve color="#1ac938" name="Error Position y"/>
+       <curve color="#ff7f0e" name="Error position z"/>
       </plot>
      </DockArea>
     </DockSplitter>
@@ -38,27 +38,27 @@
   </Tab>
   <Tab tab_name="Spatial Position" containers="1">
    <Container>
-    <DockSplitter orientation="-" count="2" sizes="0.5;0.5">
-     <DockArea name="Transverse Plan">
-      <plot mode="XYPlot" style="Lines" flip_y="false" flip_x="false">
-       <range bottom="-0.003662" left="-0.050398" right="-0.018578" top="0.003864"/>
+    <DockSplitter sizes="0.5;0.5" count="2" orientation="-">
+     <DockArea name="Transverse Plane">
+      <plot flip_x="false" style="Lines" flip_y="false" mode="XYPlot">
+       <range bottom="-0.051601" right="0.725658" left="0.689668" top="-0.043088"/>
        <limitY/>
-       <curve name="Observed [x;y]" color="#ff7f0e" curve_x="Observed x" curve_y="Observed y"/>
+       <curve color="#ff7f0e" curve_x="Observed x" curve_y="Observed y" name="Observed [x;y]"/>
       </plot>
      </DockArea>
-     <DockSplitter orientation="|" count="2" sizes="0.5;0.5">
+     <DockSplitter sizes="0.5;0.5" count="2" orientation="|">
       <DockArea name="Saggital Plane">
-       <plot mode="XYPlot" style="Lines" flip_y="false" flip_x="false">
-        <range bottom="0.302184" left="-0.039238" right="-0.029737" top="0.306889"/>
+       <plot flip_x="false" style="Lines" flip_y="false" mode="XYPlot">
+        <range bottom="0.306456" right="0.712799" left="0.702528" top="0.311542"/>
         <limitY/>
-        <curve name="Observed [x;z]" color="#f14cc1" curve_x="Observed x" curve_y="Observed z"/>
+        <curve color="#f14cc1" curve_x="Observed x" curve_y="Observed z" name="Observed [x;z]"/>
        </plot>
       </DockArea>
       <DockArea name="Coronal Plane">
-       <plot mode="XYPlot" style="Lines" flip_y="false" flip_x="false">
-        <range bottom="0.302184" left="-0.004649" right="0.004852" top="0.306889"/>
+       <plot flip_x="false" style="Lines" flip_y="false" mode="XYPlot">
+        <range bottom="0.306456" right="-0.042209" left="-0.052480" top="0.311542"/>
         <limitY/>
-        <curve name="Observed [y;z]" color="#9467bd" curve_x="Observed y" curve_y="Observed z"/>
+        <curve color="#9467bd" curve_x="Observed y" curve_y="Observed z" name="Observed [y;z]"/>
        </plot>
       </DockArea>
      </DockSplitter>
@@ -67,44 +67,44 @@
   </Tab>
   <Tab tab_name="Body" containers="1">
    <Container>
-    <DockSplitter orientation="-" count="2" sizes="0.5;0.5">
-     <DockSplitter orientation="|" count="2" sizes="0.5;0.5">
+    <DockSplitter sizes="0.5;0.5" count="2" orientation="-">
+     <DockSplitter sizes="0.5;0.5" count="2" orientation="|">
       <DockArea name="Observed Velocity (x,y,z)">
-       <plot mode="TimeSeries" style="Lines" flip_y="false" flip_x="false">
-        <range bottom="-0.047335" left="110.490000" right="115.490000" top="0.154526"/>
+       <plot flip_x="false" style="Lines" flip_y="false" mode="TimeSeries">
+        <range bottom="-0.046426" right="70.328000" left="65.328000" top="0.159990"/>
         <limitY/>
-        <curve name="/legged_robot_mpc_observation/state/value.0" color="#bcbd22"/>
-        <curve name="/legged_robot_mpc_observation/state/value.1" color="#1f77b4"/>
-        <curve name="/legged_robot_mpc_observation/state/value.2" color="#d62728"/>
+        <curve color="#9467bd" name="/legged_robot_mpc_observation/state/value.0"/>
+        <curve color="#17becf" name="/legged_robot_mpc_observation/state/value.1"/>
+        <curve color="#bcbd22" name="/legged_robot_mpc_observation/state/value.2"/>
        </plot>
       </DockArea>
-      <DockArea name="Observed Angular Velocity (x,y,z)">
-       <plot mode="TimeSeries" style="Lines" flip_y="false" flip_x="false">
-        <range bottom="-0.005366" left="110.490000" right="115.490000" top="0.005857"/>
+      <DockArea name="Observed Angular Velocity (y,p,r)">
+       <plot flip_x="false" style="Lines" flip_y="false" mode="TimeSeries">
+        <range bottom="-0.010386" right="70.328000" left="65.328000" top="0.011033"/>
         <limitY/>
-        <curve name="/legged_robot_mpc_observation/state/value.3" color="#1ac938"/>
-        <curve name="/legged_robot_mpc_observation/state/value.4" color="#ff7f0e"/>
-        <curve name="/legged_robot_mpc_observation/state/value.5" color="#f14cc1"/>
+        <curve color="#1f77b4" name="/legged_robot_mpc_observation/state/value.3"/>
+        <curve color="#d62728" name="/legged_robot_mpc_observation/state/value.4"/>
+        <curve color="#1ac938" name="/legged_robot_mpc_observation/state/value.5"/>
        </plot>
       </DockArea>
      </DockSplitter>
-     <DockSplitter orientation="|" count="2" sizes="0.5;0.5">
+     <DockSplitter sizes="0.5;0.5" count="2" orientation="|">
       <DockArea name="Observed Position (x,y,z)">
-       <plot mode="TimeSeries" style="Lines" flip_y="false" flip_x="false">
-        <range bottom="-0.044226" left="110.490000" right="115.490000" top="0.315338"/>
+       <plot flip_x="false" style="Lines" flip_y="false" mode="TimeSeries">
+        <range bottom="-0.070421" right="70.328000" left="65.328000" top="0.728541"/>
         <limitY/>
-        <curve name="/legged_robot_mpc_observation/state/value.6" color="#9467bd"/>
-        <curve name="/legged_robot_mpc_observation/state/value.7" color="#17becf"/>
-        <curve name="/legged_robot_mpc_observation/state/value.8" color="#bcbd22"/>
+        <curve color="#ff7f0e" name="/legged_robot_mpc_observation/state/value.6"/>
+        <curve color="#f14cc1" name="/legged_robot_mpc_observation/state/value.7"/>
+        <curve color="#9467bd" name="/legged_robot_mpc_observation/state/value.8"/>
        </plot>
       </DockArea>
-      <DockArea name="Observed Angular Position (x,y,z)">
-       <plot mode="TimeSeries" style="Lines" flip_y="false" flip_x="false">
-        <range bottom="-0.028715" left="110.490000" right="115.490000" top="0.012017"/>
+      <DockArea name="Observed Angular Position (y,p,r)">
+       <plot flip_x="false" style="Lines" flip_y="false" mode="TimeSeries">
+        <range bottom="-0.014069" right="70.328000" left="65.328000" top="0.202538"/>
         <limitY/>
-        <curve name="/legged_robot_mpc_observation/state/value.10" color="#1f77b4"/>
-        <curve name="/legged_robot_mpc_observation/state/value.11" color="#d62728"/>
-        <curve name="/legged_robot_mpc_observation/state/value.9" color="#1ac938"/>
+        <curve color="#17becf" name="/legged_robot_mpc_observation/state/value.10"/>
+        <curve color="#bcbd22" name="/legged_robot_mpc_observation/state/value.11"/>
+        <curve color="#1f77b4" name="/legged_robot_mpc_observation/state/value.9"/>
        </plot>
       </DockArea>
      </DockSplitter>
@@ -113,24 +113,60 @@
   </Tab>
   <Tab tab_name="Control" containers="1">
    <Container>
-    <DockSplitter orientation="-" count="1" sizes="1">
-     <DockArea name="...">
-      <plot mode="TimeSeries" style="Lines" flip_y="false" flip_x="false">
-       <range bottom="-3.002043" left="28.929000" right="33.926000" top="69.738080"/>
-       <limitY/>
-      </plot>
-     </DockArea>
+    <DockSplitter sizes="1" count="1" orientation="-">
+     <DockSplitter sizes="0.5;0.5" count="2" orientation="|">
+      <DockSplitter sizes="0.5;0.5" count="2" orientation="-">
+       <DockArea name="Left Front Feet Contact Forces">
+        <plot flip_x="false" style="Lines" flip_y="false" mode="TimeSeries">
+         <range bottom="-5.641898" right="70.328000" left="65.328000" top="69.969280"/>
+         <limitY/>
+         <curve color="#ff7f0e" name="/legged_robot_mpc_observation/input/value.0"/>
+         <curve color="#f14cc1" name="/legged_robot_mpc_observation/input/value.1"/>
+         <curve color="#9467bd" name="/legged_robot_mpc_observation/input/value.2"/>
+        </plot>
+       </DockArea>
+       <DockArea name="Left Hind Feet Contact Forces">
+        <plot flip_x="false" style="Lines" flip_y="false" mode="TimeSeries">
+         <range bottom="-5.741310" right="70.328000" left="65.328000" top="83.083841"/>
+         <limitY/>
+         <curve color="#d62728" name="/legged_robot_mpc_observation/input/value.6"/>
+         <curve color="#1ac938" name="/legged_robot_mpc_observation/input/value.7"/>
+         <curve color="#ff7f0e" name="/legged_robot_mpc_observation/input/value.8"/>
+        </plot>
+       </DockArea>
+      </DockSplitter>
+      <DockSplitter sizes="0.5;0.5" count="2" orientation="-">
+       <DockArea name="Right Front Feet Contact Forces">
+        <plot flip_x="false" style="Lines" flip_y="false" mode="TimeSeries">
+         <range bottom="-9.017900" right="70.328000" left="65.328000" top="69.470142"/>
+         <limitY/>
+         <curve color="#17becf" name="/legged_robot_mpc_observation/input/value.3"/>
+         <curve color="#bcbd22" name="/legged_robot_mpc_observation/input/value.4"/>
+         <curve color="#1f77b4" name="/legged_robot_mpc_observation/input/value.5"/>
+        </plot>
+       </DockArea>
+       <DockArea name="Right Hind Feet Contact Forces">
+        <plot flip_x="false" style="Lines" flip_y="false" mode="TimeSeries">
+         <range bottom="-4.260480" right="70.328000" left="65.328000" top="83.671851"/>
+         <limitY/>
+         <curve color="#f14cc1" name="/legged_robot_mpc_observation/input/value.10"/>
+         <curve color="#9467bd" name="/legged_robot_mpc_observation/input/value.11"/>
+         <curve color="#17becf" name="/legged_robot_mpc_observation/input/value.9"/>
+        </plot>
+       </DockArea>
+      </DockSplitter>
+     </DockSplitter>
     </DockSplitter>
    </Container>
   </Tab>
-  <currentTabIndex index="0"/>
+  <currentTabIndex index="3"/>
  </tabbed_widget>
  <use_relative_time_offset enabled="1"/>
  <!-- - - - - - - - - - - - - - - -->
  <!-- - - - - - - - - - - - - - - -->
  <Plugins>
   <plugin ID="DataLoad CSV">
-   <default delimiter="0" time_axis=""/>
+   <default time_axis="" delimiter="0"/>
   </plugin>
   <plugin ID="DataLoad MCAP"/>
   <plugin ID="DataLoad ROS bags">
