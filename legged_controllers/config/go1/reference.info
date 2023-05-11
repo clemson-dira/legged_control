@@ -1,7 +1,7 @@
 targetDisplacementVelocity          0.5;
-targetRotationVelocity              1.57;
+targetRotationVelocity              1.25;
 
-comHeight                           0.325 ; Original: 0.3, second value: 0.3683
+comHeight                           0.31 ; Unitree Go1 Default Spec: 0.325 -> 0.31
 
 defaultJointState
 {

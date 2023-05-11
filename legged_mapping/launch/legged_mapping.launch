@@ -1,0 +1,28 @@
+<launch>
+    <arg name="robot_type" default="$(env ROBOT_TYPE)" />
+    <arg name="multi_realsense_enabled" default="true" />
+
+
+    <!-- Publish tf 'base' as pose -->
+    <node pkg="legged_mapping" type="tf_to_pose_publisher.py" name="legged_pose_publisher">
+        <param name="from_frame" type="string" value="odom" />
+        <param name="to_frame" type="string" value="base" />
+    </node>
+
+    <!-- Run a passthrough filter to down-sample the sensor point cloud -->
+    <include file="$(find legged_mapping)/launch/down_sample.launch">
+        <arg name="multi_realsense_enabled" value="$(arg multi_realsense_enabled)" />
+    </include>
+
+    <!-- Launch elevation mapping node -->
+    <node unless="$(arg multi_realsense_enabled)" pkg="elevation_mapping" type="elevation_mapping"
+        name="elevation_mapping" output="screen" launch-prefix="gnome-terminal --">
+        <rosparam command="load" file="$(find legged_mapping)/config/go1.yaml" />
+        <rosparam command="load" file="$(find legged_mapping)/config/postprocessor_pipeline.yaml" />
+    </node>
+    <node if="$(arg multi_realsense_enabled)" pkg="elevation_mapping" type="elevation_mapping"
+        name="elevation_mapping" output="screen" launch-prefix="gnome-terminal --">
+        <rosparam command="load" file="$(find legged_mapping)/config/go1_multi_realsense.yaml" />
+        <rosparam command="load" file="$(find legged_mapping)/config/postprocessor_pipeline.yaml" />
+    </node>
+</launch>

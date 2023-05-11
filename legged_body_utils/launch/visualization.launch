@@ -1,0 +1,9 @@
+<launch>
+    <arg name="live_plot" default="false" />
+
+    <group if="$(arg live_plot)">
+        <node name="plotjuggler" pkg="plotjuggler" type="plotjuggler"
+            args="--layout $(find legged_body_utils)/config/plotjuggler_config.xml" />
+    </group>
+
+</launch>

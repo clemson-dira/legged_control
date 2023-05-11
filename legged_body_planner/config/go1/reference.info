@@ -1,0 +1,21 @@
+targetDisplacementVelocity          0.1; Original : 0.5 | Hardware : 0.1
+targetRotationVelocity              0.314; Original : 1.57 | Hardware : 0.314
+
+comHeight                           0.31 ; Default unitree go1 value 0.31
+
+defaultJointState
+{
+   (0,0)   0.00   ; LF_HAA | Original: -0.20
+   (1,0)   0.72   ; LF_HFE | Original: 0.72
+   (2,0)  -1.44   ; LF_KFE | Original: -1.44
+   (3,0)   0.00   ; LH_HAA | Original: -0.20
+   (4,0)   0.72   ; LH_HFE | Original: 0.72
+   (5,0)  -1.44   ; LH_KFE | Original: -1.44
+   (6,0)   0.00   ; RF_HAA | Original: 0.20
+   (7,0)   0.72   ; RF_HFE | Original: 0.72
+   (8,0)  -1.44   ; RF_KFE | Original: -1.44
+   (9,0)   0.00   ; RH_HAA | Original: 0.20
+   (10,0)  0.72   ; RH_HFE | Original: 0.72
+   (11,0) -1.44   ; RH_KFE | Original: -1.44
+}
+

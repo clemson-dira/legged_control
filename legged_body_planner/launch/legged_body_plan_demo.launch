@@ -1,0 +1,72 @@
+<launch>
+    <!-- Define args -->
+    <arg name="robot_type" default="$(env ROBOT_TYPE)" doc="Robot type: [a1, aliengo, go1, laikago]" />
+    <arg name="robot_spawn" default="-x 0.0 -y 0.0 -z 0.5 -Y 0.0" />
+
+    <!-- Robot Params -->
+    <arg name="urdfFile" default="/tmp/legged_control/$(arg robot_type).urdf" />
+    <arg name="planTaskFile"
+        default="$(find legged_body_planner)/config/$(arg robot_type)/task.info" />
+    <arg name="planReferenceFile"
+        default="$(find legged_body_planner)/config/$(arg robot_type)/reference.info" />
+
+    <param name="planTaskFile" value="$(arg planTaskFile)" type="str" />
+    <param name="planReferenceFile"
+        value="$(arg planReferenceFile)" type="str" />
+
+
+    <!-- Legged Body Planner Params -->
+    <rosparam file="$(find legged_body_planner)/config/legged_body_planner.yaml" command="load" />
+    <rosparam file="$(find legged_body_planner)/config/legged_body_planner_topics.yaml"
+        command="load" />
+
+    <!-- Rviz & Gazebo Settings -->
+    <arg name="gui" default="false" />
+    <arg name="rviz" default="true" />
+    <arg name="rviz_config" default="$(find legged_mapping)/rviz/legged_mapping.rviz" />
+    <arg name="paused" default="false" />
+    <arg name="world" default="worlds/empty.world" />
+    <arg name="live_plot" default="false" />
+
+    <!-- Multi-realsense mapping -->
+    <arg name="multi_realsense_enabled" default="false" />
+
+    <!-- Load world w/ robot -->
+    <include file="$(find legged_unitree_description)/launch/load_world.launch">
+        <arg name="gui" value="$(arg gui)" />
+        <arg name="rviz" value="$(arg rviz)" />
+        <arg name="robot_spawn"
+            value="$(arg robot_spawn)" />
+        <arg name="rviz_config" value="$(arg rviz_config)" />
+        <arg name="robot_type" value="$(arg robot_type)" />
+        <arg name="paused" value="$(arg paused)" />
+    </include>
+
+    <!-- Load controller -->
+    <include file="$(find legged_controllers)/launch/load_controller.launch">
+        <arg name="spawner" value="true" />
+        <arg name="cheater" value="false" />
+        <arg name="urdfFile" value="$(arg urdfFile)" />
+        <arg name="taskFile" value="$(find legged_controllers)/config/$(arg robot_type)/task.info" />
+        <arg name="referenceFile"
+            value="$(find legged_controllers)/config/$(arg robot_type)/reference.info" />
+        <arg name="gaitCommandFile"
+            value="$(find legged_controllers)/config/$(arg robot_type)/gait.info" />
+        <arg name="legged_pub" value="false" />
+    </include>
+
+    <include file="$(find legged_mapping)/launch/legged_mapping.launch">
+        <arg name="robot_type" value="$(arg robot_type)" />
+        <arg name="multi_realsense_enabled" value="$(arg multi_realsense_enabled)" />
+    </include>
+
+    <!-- Launch planner -->
+    <node pkg="legged_body_planner" type="legged_body_planner_node" name="legged_body_planner"
+        output="screen" launch-prefix="gnome-terminal --" />
+
+    <group if="$(arg live_plot)">
+        <include file="$(find legged_body_utils)/launch/visualization.launch">
+            <arg name="live_plot" value="$(arg live_plot)" />
+        </include>
+    </group>
+</launch>

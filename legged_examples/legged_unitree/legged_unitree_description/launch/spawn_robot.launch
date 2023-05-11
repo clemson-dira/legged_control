@@ -2,6 +2,8 @@
 
     <arg name="robot_type" default="$(env ROBOT_TYPE)" doc="Robot type: [a1, aliengo, go1, laikago]" />
     <arg name="robot_spawn" default="-x 6 -y 4.0 -z 1.5 -Y 3.1415" />
+    <arg name="rviz" default="false" />
+    <arg name="rviz_config" default="$(find legged_unitree_description)/launch/rviz_config.rviz" />
 
 
     <rosparam file="$(find legged_gazebo)/config/default.yaml" command="load" />
@@ -26,4 +28,9 @@
     <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" clear_params="true"
         args="$(arg robot_spawn) -param legged_robot_description -urdf -model $(arg robot_type)"
         output="screen" />
+
+    <group if="$(arg rviz)">
+        <node pkg="rviz" type="rviz" name="rviz" respawn="false" output="screen"
+            args="-d $(arg rviz_config)" />
+    </group>
 </launch>

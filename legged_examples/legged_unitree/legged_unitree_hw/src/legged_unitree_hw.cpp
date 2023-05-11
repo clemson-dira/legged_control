@@ -36,6 +36,7 @@
 //
 
 #include <legged_hw/LeggedHWLoop.h>
+
 #include "legged_unitree_hw/UnitreeHW.h"
 
 int main(int argc, char** argv) {
@@ -54,7 +55,8 @@ int main(int argc, char** argv) {
 
   try {
     // Create the hardware interface specific to your robot
-    std::shared_ptr<legged::UnitreeHW> unitreeHw = std::make_shared<legged::UnitreeHW>();
+    std::shared_ptr<legged::UnitreeHW> unitreeHw =
+        std::make_shared<legged::UnitreeHW>();
     // Initialize the hardware interface:
     // 1. retrieve configuration from rosparam
     // 2. initialize the hardware and interface it with ros_control

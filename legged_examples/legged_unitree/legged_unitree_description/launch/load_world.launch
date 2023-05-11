@@ -6,7 +6,7 @@
    <arg name="headless" default="false" />
    <arg name="debug" default="false" />
    <arg name="verbose" default="false" />
-   <arg name="world_name" default="worlds/empty.world" />
+   <arg name="world_name" default="$(find legged_gazebo)/worlds/empty_world.world" />
 
    <!-- Robot Args -->
    <arg name="robot_type" default="$(env ROBOT_TYPE)" doc="Robot type: [a1, aliengo, go1, laikago]" />
@@ -18,13 +18,11 @@
 
    <!-- We resume the logic in empty_world.launch, changing only the name of the world to be
    launched -->
-   <include file="$(find gazebo_ros)/launch/empty_world.launch">
+   <include file="$(find legged_unitree_description)/launch/empty_world.launch">
       <arg name="world_name" value="$(arg world_name)" />
-      <arg name="debug" value="$(arg debug)" />
       <arg name="gui" value="$(arg gui)" />
       <arg name="paused" value="$(arg paused)" />
       <arg name="use_sim_time" value="$(arg use_sim_time)" />
-      <arg name="headless" value="$(arg headless)" />
       <arg name="verbose" value="$(arg verbose)" />
    </include>
 
@@ -32,11 +30,7 @@
    <include file="$(find legged_unitree_description)/launch/spawn_robot.launch">
       <arg name="robot_type" value="$(arg robot_type)" />
       <arg name="robot_spawn" value="$(arg robot_spawn)" />
+      <arg name="rviz" value="$(arg rviz)" />
+      <arg name="rviz_config" value="$(arg rviz_config)" />
    </include>
-
-   <!-- Rviz Configurations -->
-   <group if="$(arg rviz)">
-      <node pkg="rviz" type="rviz" name="rviz" respawn="false" output="screen"
-         args="-d $(arg rviz_config)" />
-   </group>
 </launch>

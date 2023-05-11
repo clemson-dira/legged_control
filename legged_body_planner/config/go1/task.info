@@ -1,0 +1,5 @@
+mpc
+{
+  timeHorizon                     1.0  ; [s]
+}
+
