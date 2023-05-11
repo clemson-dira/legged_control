@@ -49,11 +49,14 @@
 
 namespace legged {
 struct HybridJointData {
+  HybridJointData(hardware_interface::JointHandle joint) : joint_(joint){} // ros-melodic changes | add initializer list to constructor
   hardware_interface::JointHandle joint_;
   double posDes_{}, velDes_{}, kp_{}, kd_{}, ff_{};
 };
 
 struct HybridJointCommand {
+  HybridJointCommand(ros::Time stamp, double posDes, double velDes, double kp, double kd, 
+    double ff) : posDes_(posDes), velDes_(velDes), kp_(kp), kd_(kd), ff_(ff) {} // ros-melodic changes | add initializer list to constructor
   ros::Time stamp_;
   double posDes_{}, velDes_{}, kp_{}, kd_{}, ff_{};
 };
