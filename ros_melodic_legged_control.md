@@ -1,18 +1,26 @@
 # Installing Legged Control on ROS Melodic
+Rough notes of converting legged control to be ros melodic compatible
 
-## Install ros melodic desktop ONLY
-Then follow rest of instructions
+***Note:*** Notes are rough and assumes that the workspace is named legged_robot_ws
+
+
+## Install ROS Melodic Desktop ONLY
+This is so that it can be more lightweight
+
+Install ros melodic through ros website, then follow the instructions sequentially
+
 Install catkin tools
-	- https://stackoverflow.com/questions/41234957/catkin-command-not-found
-	- Use melodic version
+- https://stackoverflow.com/questions/41234957/catkin-command-not-found
+- Use melodic version
 
-update Cmake greater than 3.14 usinf following link:
-	- https://askubuntu.com/questions/829310/how-to-upgrade-cmake-in-ubuntu
-	- Install Linux x86_64 shell version
+Upgrade CMake s.t. greater than 3.14 using the following link:
+- https://askubuntu.com/questions/829310/how-to-upgrade-cmake-in-ubuntu
+- Install Linux x86_64 shell version
 
 
 
-### Build files
+## STEPS IN CONVERTING NOETIC TO MELODIC COMPATIBILITY
+### Install Dependencies
 Install dependencies
 ```
 sudo apt-get install doxygen
@@ -28,6 +36,7 @@ IF WANT TO INSTALL GAZEBO on HW, DO THE FOLLOWING:
 ```
 sudo apt-get install ros-melodic-gazebo-ros-pkgs ros-melodic-gazebo-ros-control
 ```
+### Syntactical Edits
 Change publishTransforms, etc. to ros melodic syntax
 - https://github.com/leggedrobotics/ocs2/issues/28
 - Or look up ros melodic documentation of the member functions
@@ -80,7 +89,7 @@ git clone git@github.com:ANYbotics/kindr.git
 git clone git@github.com:ANYbotics/kindr_ros.git
 git clone git@github.com:ANYbotics/message_logger.git
 ```
-## Code Adjustment for melodic
+### Elevation Mapping Code Adjustments
 Change C++ stl function
 - In ocs2 core Numerics.h
 ```
@@ -109,10 +118,12 @@ Change in `PostProcessingPipelineFunctor.hpp` the following
 #include <filters/filter_chain.h>
 ```
 
-
+## Build
 Build legged body planner, etc.
 ```
 catkin build legged_body_planner legged_body_msgs legged_mapping
+source ~/legged_robot_ws/devel/setup.bash
 ```
+Hopefully, everything is built successfully!
 
 
