@@ -1,3 +1,4 @@
+# TODO (AZ): Look into how to process/filter data and add layers
 postprocessor_pipeline: # set by postprocessor_pipeline_name
   - name: bufferNormalizer
     type: gridMapFilters/BufferNormalizerFilter
