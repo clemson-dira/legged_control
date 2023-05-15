@@ -271,7 +271,7 @@ class Density:
             # saturate the control inputs
             if np.max(u[:, i-1]) >= saturation:
                # print('saturation')
-                u[:, i-1] = (u[:, i-1]/np.max(u[:, i-1]))*saturation
+                u[:, i-1] = (u[:, i-1]/np.max(np.abs(u[:, i-1])))*saturation
 
             # propagate the states
             x[0, i] = x[0, i-1] + dt*u[0, i-1]
