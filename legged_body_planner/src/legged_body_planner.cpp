@@ -134,9 +134,9 @@ void LeggedBodyPlanner::publishCurrentPlan() {
     body_plan_pub_.publish(body_plan_);
     retrieved_plan_ =
         false;  // Plan has been pub, new plan has not been retrieved
+    // After publlishing, if plan was first plan, turn to false
+    if (first_plan_) first_plan_ = false;
   }
-  // After publlishing, if plan was first plan, turn to false
-  if (first_plan_) first_plan_ = false;
 }
 
 void LeggedBodyPlanner::spin() {
