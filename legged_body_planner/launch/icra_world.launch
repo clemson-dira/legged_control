@@ -2,10 +2,11 @@
     <!-- Define args -->
     <arg name="robot_type" default="$(env ROBOT_TYPE)" doc="Robot type: [a1, aliengo, go1, laikago]" />
     <!-- Spawn Locations for different component of the map -->
-    <!-- 1st Section: x,y,z,Y: 6.5, 1, 1, 3.1415-->
-    <!-- 2nd Section: x,y,z,Y: 1.5, 1.7, 1.0, 3.1415-->
-    <!-- 3rd Section: x,y,z,Y: 3.5, 1.5, 1.0, 3.1415-->
-    <arg name="robot_spawn" default="-x 6.5 -y 1 -z 1.0 -Y 3.1415" />
+    <!-- 1st Section: x,y,z,Y: 6.5, 1, 1, -3.1415-->
+    <!-- 2nd Section: x,y,z,Y: 1.5, 1.5, 1.0, -3.1415-->
+    <!-- 3rd Section: x,y,z,Y: 3.5, 1.5, 1.0, -3.1415-->
+    <arg name="robot_spawn" default="-x 6.5 -y 1 -z 1.0 -Y -3.1415" />
+    <arg name="section" default="" />
     <arg name="world" default="$(find legged_gazebo)/worlds/icra/icra.world" />
 
     <!-- Robot Params -->
@@ -63,12 +64,14 @@
         <arg name="spawner" value="true" />
         <arg name="cheater" value="false" />
         <arg name="urdfFile" value="$(arg urdfFile)" />
-        <arg name="taskFile" value="$(find legged_controllers)/config/$(arg robot_type)/task.info" />
+        <arg name="taskFile"
+            value="$(find legged_controllers)/config/$(arg robot_type)/task$(arg section).info" />
         <arg name="referenceFile"
             value="$(find legged_controllers)/config/$(arg robot_type)/reference.info" />
         <arg name="gaitCommandFile"
             value="$(find legged_controllers)/config/$(arg robot_type)/gait.info" />
         <arg name="legged_pub" value="false" />
+        <arg name="section" value="$(arg section)" />
     </include>
 
     <include file="$(find legged_mapping)/launch/legged_mapping.launch">

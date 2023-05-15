@@ -5,9 +5,11 @@
     <arg name="cheater" default="false" />
     <arg name="spawner" default="false" />
     <arg name="legged_pub" default="false" /> <!-- Load comm to controller -->
+    <arg name="section" default="" /> <!-- Different parameters for different sections -->
 
     <arg name="urdfFile" default="/tmp/legged_control/$(arg robot_type).urdf" />
-    <arg name="taskFile" default="$(find legged_controllers)/config/$(arg robot_type)/task.info" />
+    <arg name="taskFile"
+        default="$(find legged_controllers)/config/$(arg robot_type)/task$(arg section).info" />
     <arg name="referenceFile"
         default="$(find legged_controllers)/config/$(arg robot_type)/reference.info" />
     <arg name="gaitCommandFile"

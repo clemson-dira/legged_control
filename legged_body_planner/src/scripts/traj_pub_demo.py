@@ -4,8 +4,15 @@
 import rospy
 from geometry_msgs.msg import Twist
 from geometry_msgs.msg import PoseStamped
+from legged_body_msgs.msg import State
+from legged_body_msgs.msg import Control
+from legged_body_msgs.msg import Plan
+from ocs2_msgs.msg import mpc_observation
+import std_msgs.msg
+
 import math
 import sys
+import numpy as np
 
 
 """
@@ -78,17 +85,105 @@ def target_pose_talker():
         pub.publish(msg)
         rate.sleep()
 
+class OfflinePlan:
+    def __init__(self, nom_vel, nom_ang_vel, goal, rate):
+        self.nom_vel = nom_vel
+        self.nom_ang_vel = nom_ang_vel
+        self.goal = goal
+        self.rate = rospy.Rate(rate)
+        self.observer_sub = rospy.Subscriber('/legged_robot_mpc_observation', mpc_observation, self.observationCallback)
+        self.body_plan_pub = rospy.Publisher('plan', Plan, queue_size=1)
+    
+    def observationCallback(self, observer_msg):
+        """
+        Calls to the observer to get observed time, states, and control
+        Note - time : double, state : list (curr state @ least xyz_dot, ypr_dot, xyz, ypr, default_joint_states)
+                control : list (GRFs I believe)
+        Inputs:
+        -------
+        observer_msg : mpc_observation that gives current observed time, state, and input
+        """
+        self.curr_time = observer_msg.time
+        self.state = observer_msg.state
+        self.control = observer_msg.input
+    
+    def estimateTimeToTarget(self, pos1, pos2):
+        """
+        Given position 1 and position 2, and nominal velocity, find the time taken to go towards
+        target
+        Inputs:
+        -------
+        pos1 : list
+            Initial position (xyz, ypr)
+        pos2 : list
+            Target position (xyz, ypr)
+        nom_vel : float
+            Nominal linear velocity
+        nom_ang_vel : float
+            Nominal angular velocity
+        
+        Return:
+        --------
+        time : double/float
+            Estimated time to reach target
+        """
+        assert np.size(pos1) >= 4, "Position 1 states must at least be size 4"
+        assert np.size(pos2) >= 4, "Position 2 state must at least be size 4"
+        difference = np.array(pos2[0:4]) - np.array(pos1[0:4])
+        dx = difference[0]
+        dy = difference[1]
+        dyaw = difference[3]
+        distance = np.sqrt(dx*dx + dy * dy)
+        rotation_time = np.abs(dyaw)/self.nom_ang_vel
+        displacement_time = distance/self.nom_vel
+        return np.max([rotation_time, displacement_time])
+
+    def pubBodyPlan(self):
+        # Get into Plan Msg format
+        header = std_msgs.msg.Header()
+        header.stamp = rospy.Time(self.curr_time)
+        plan_msg = Plan()
+        plan_msg.header.stamp = header.stamp
+        plan_msg.plan_timestamp = header.stamp
+        time_to_target = self.estimateTimeToTarget(self.state.value, self.goal)
+        
+        plan_msg.times = [self.curr_time, self.curr_time + time_to_target]
+        plan_msg.states = [State(value=self.state.value), State(value=self.goal)]
+        plan_msg.controls = [Control(), Control()]
+        self.body_plan_pub.publish(plan_msg)
+    
+    def spin(self):
+        print("Spinning pub body plan demo")
+        rospy.wait_for_message('/legged_robot_mpc_observation', mpc_observation)
+        while (not rospy.is_shutdown()):
+            rospy.loginfo_throttle(5, "Publishing fixed offline plan")
+            self.pubBodyPlan()
+            self.rate.sleep()
+
+def bodyPlan():
+    print("Running offline body plan")
+    goal = [-5, 0, 0.31, -3.1415] # x, y, z, yaw
+    nom_vel = 0.1
+    nom_ang_vel = 0.314
+    rate = 50
+    offline_plan = OfflinePlan(nom_vel=nom_vel, nom_ang_vel=nom_ang_vel, goal=goal, rate=rate)
+    offline_plan.spin()
+
+
+
 
 def main():
     if len(sys.argv) <= 1:
         print(
-            "Please rerun and enter w/ type of publishing mode: 'cmd_vel' OR 'target_pose'")
+            "Please rerun and enter w/ type of publishing mode: 'cmd_vel' OR 'target_pose' OR 'body_plan'")
         return
     type_pub = sys.argv[1]
     if type_pub == "cmd_vel":
         cmd_vel_talker()
     elif type_pub == "target_pose":
         target_pose_talker()
+    elif type_pub =="body_plan":
+        bodyPlan()
     else:
         print("Non-valid publishing mode. Please choose either cmd_vel or target_pose")
 

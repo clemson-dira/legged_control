@@ -269,9 +269,10 @@ class Density:
                 u[1, i-1] = 0
 
             # saturate the control inputs
-            if np.max(u[:, i-1]) >= saturation:
-               # print('saturation')
-                u[:, i-1] = (u[:, i-1]/np.max(u[:, i-1]))*saturation
+            # print(np.abs(u[:, i-1]))
+            if np.max(np.abs(u[:, i-1])) >= saturation:
+                # print('saturation')
+                u[:, i-1] = (u[:, i-1]/np.max(np.abs(u[:, i-1])))*saturation
 
             # propagate the states
             x[0, i] = x[0, i-1] + dt*u[0, i-1]
@@ -329,10 +330,10 @@ def symlog(x):
 def main():
     plot_density = True
     plot_traj = True
-    density = Density(r1=0.5, r2=1.25, obs_center=[1.5, 0.1, 3.5, -2], goal=[
-                      5.0, 0], alpha=0.2, gain=10, saturation=0.1, rad_from_goal=0.15)
+    density = Density(r1=0.5, r2=1.25, obs_center=[10.5, 0.1, 30.5, -2], goal=[
+                      -5.0, 0], alpha=0.2, gain=10, saturation=0.05, rad_from_goal=0.15)
 
-    N = 10000
+    N = 1000
     dt = 0.01
     x0 = 0
     y0 = 0

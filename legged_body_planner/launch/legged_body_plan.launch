@@ -17,4 +17,7 @@
 
     <node pkg="legged_body_planner" type="legged_body_planner_node" name="legged_body_planner"
         output="screen" launch-prefix="gnome-terminal --" />
+
+    <node pkg="legged_body_planner" type="pub_body_plan_demo.py" name="legged_body_plan"
+        output="screen" />
 </launch>

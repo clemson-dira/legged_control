@@ -58,7 +58,7 @@ void LeggedBodyPlanner::planCallback(
   //    - Assumes that plan received is new & valid
   //    - Clears the original plan
   //    - Use the plan and convert to rigid body plan
-  ROS_INFO_THROTTLE(1, "Received plan");
+  ROS_INFO_THROTTLE(2, "Received plan");
 
   retrieved_plan_ = false;  // Assumes plan has not been retrieved
   if (first_plan_ || replan_) {
@@ -73,7 +73,7 @@ void LeggedBodyPlanner::planCallback(
       ROS_WARN("Plan to rigid body plan transfer not successful... Warning!");
       return;
     }
-    ROS_INFO_THROTTLE(1, "Converted to rigid body plan");
+    ROS_INFO_THROTTLE(2, "Converted to legged body plan");
 
     retrieved_plan_ = true;
   }
@@ -130,13 +130,13 @@ void LeggedBodyPlanner::publishCurrentPlan() {
   //                   replan_);
   ROS_INFO_THROTTLE(2, "Retrieved plan %d", retrieved_plan_);
   if (retrieved_plan_ && (first_plan_ || replan_) && !terminate_planner_) {
-    // ROS_INFO_THROTTLE(1, "Publishing Plan");
+    ROS_INFO_THROTTLE(2, "Publishing Plan");
     body_plan_pub_.publish(body_plan_);
     retrieved_plan_ =
         false;  // Plan has been pub, new plan has not been retrieved
+    // After publishing, if plan was first plan, turn to false
+    if (first_plan_) first_plan_ = false;
   }
-  // After publlishing, if plan was first plan, turn to false
-  if (first_plan_) first_plan_ = false;
 }
 
 void LeggedBodyPlanner::spin() {

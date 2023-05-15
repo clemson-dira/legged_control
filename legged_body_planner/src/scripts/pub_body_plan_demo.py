@@ -19,14 +19,6 @@ import sys
     Remark: This publishes to plan which legged_body_planner should subcribe to
 """
 
-"""
-TODO list
-1) Enable multiple obstacles
-2) Filtering
-3) Finite diff for yaw rate
-"""
-
-
 # # Define global parameters
 
 dt = 0.01  # Original: 0.01
@@ -111,7 +103,8 @@ class PubBodyPlanDemo:
             # else:
             #     yaw_list.append(self.getYaw(
             #         [x_dot_list[-1], y_dot_list[-1]], yaw_list[-1]))
-            yaw_list.append(0)
+            # yaw_list.append(-3.1415)
+            yaw_list.append(-3.14)
 
         # Apply filter
         filtered_x_list = self.movingAverageFilter(x_list, self.window_size)
@@ -169,7 +162,7 @@ class PubBodyPlanDemo:
         rospy.wait_for_message(
             '/legged_robot_mpc_observation', mpc_observation)
         while (not rospy.is_shutdown()):
-            rospy.loginfo_throttle(1, "Republishing feedback planner")
+            rospy.loginfo_throttle(5, "Publishing feedback planner")
             self.pub_body_plan()
             self.rate.sleep()
 
