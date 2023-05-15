@@ -82,6 +82,7 @@ sudo apt install libpcl-dev
 sudo apt install ros-melodic-pcl-ros
 sudo apt install pcl-tools
 sudo apt-get install python-rospkg
+sudo apt install ros-$ROS_DISTRO-plotjuggler-ros
 # Clone repos
 cd ~/legged_robot_ws/src
 git clone https://github.com/anybotics/elevation_mapping.git
@@ -121,7 +122,7 @@ Change in `PostProcessingPipelineFunctor.hpp` the following
 ## Build
 Build legged body planner, etc.
 ```
-catkin build legged_body_planner legged_body_msgs legged_mapping
+catkin build legged_body_planner legged_body_msgs legged_mapping legged_body_utils
 source ~/legged_robot_ws/devel/setup.bash
 ```
 Hopefully, everything is built successfully!
