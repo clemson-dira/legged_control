@@ -16,6 +16,7 @@ Install catkin tools
 Upgrade CMake s.t. greater than 3.14 using the following link:
 - https://askubuntu.com/questions/829310/how-to-upgrade-cmake-in-ubuntu
 - Install Linux x86_64 shell version
+  - Linux Aarch64 for ARM system 
 
 
 
@@ -105,7 +106,8 @@ Change python version
 ```
 
 Change elevation map accordingly
-Source: https://github.com/ANYbotics/elevation_mapping/issues/151
+
+Source: https://github.com/ANYbotics/elevation_mapping/issues/151 (Don't think I changed to source branch... kept with master.. TODO: double check)
 
 ```
 cd ~/legged_robot_ws/src/elevation_mapping
@@ -120,6 +122,7 @@ Change in `PostProcessingPipelineFunctor.hpp` the following
 ```
 
 ## Build
+Build from legged control instructions
 Build legged body planner, etc.
 ```
 catkin build legged_body_planner legged_body_msgs legged_mapping legged_body_utils
