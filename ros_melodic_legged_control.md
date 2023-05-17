@@ -16,6 +16,7 @@ Install catkin tools
 Upgrade CMake s.t. greater than 3.14 using the following link:
 - https://askubuntu.com/questions/829310/how-to-upgrade-cmake-in-ubuntu
 - Install Linux x86_64 shell version
+  - Linux Aarch64 for ARM system 
 
 
 
