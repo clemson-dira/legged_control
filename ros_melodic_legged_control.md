@@ -39,9 +39,10 @@ sudo apt-get install ros-melodic-gazebo-ros-pkgs ros-melodic-gazebo-ros-control
 ```
 
 ### Install Legged Control
-Install legged control repos
-
-https://github.com/qiayuanliao/legged_control
+Install legged control dependencies / clone this repo
+```
+git clone git@github.com:clemson-dira/legged_control.git
+```
 
 ### Syntactical Edits
 Change publishTransforms, etc. to ros melodic syntax
