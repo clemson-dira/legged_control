@@ -37,6 +37,12 @@ IF WANT TO INSTALL GAZEBO on HW, DO THE FOLLOWING:
 ```
 sudo apt-get install ros-melodic-gazebo-ros-pkgs ros-melodic-gazebo-ros-control
 ```
+
+### Install Legged Control
+Install legged control repos
+
+https://github.com/qiayuanliao/legged_control
+
 ### Syntactical Edits
 Change publishTransforms, etc. to ros melodic syntax
 - https://github.com/leggedrobotics/ocs2/issues/28
