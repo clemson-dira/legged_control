@@ -269,7 +269,7 @@ class Density:
                 u[1, i-1] = 0
 
             # saturate the control inputs
-            if np.max(u[:, i-1]) >= saturation:
+            if np.max(np.abs(u[:, i-1])) >= saturation:
                 # print('saturation')
                 u[:, i-1] = (u[:, i-1]/np.max(np.abs(u[:, i-1])))*saturation
 
@@ -329,8 +329,8 @@ def symlog(x):
 def main():
     plot_density = True
     plot_traj = True
-    density = Density(r1=0.5, r2=1.25, obs_center=[1.5, 0.1, 3.5, -2], goal=[
-                      5.0, 0], alpha=0.2, gain=10, saturation=0.1, rad_from_goal=0.15)
+    density = Density(r1=0.5, r2=1.25, obs_center=[100,100], goal=[
+                      -5.0, 0], alpha=0.2, gain=10, saturation=0.1, rad_from_goal=0.15)
 
     N = 10000
     dt = 0.01
@@ -339,7 +339,30 @@ def main():
     current_t = 0
     rad_from_goal = 0.1
     t, x, u = density.get_plan(current_t, x0, y0, N, dt)
-
+    
+    ## test reading from text file for pf plan
+    plot_density = False
+    plot_traj = True
+    N = 100
+    xx = np.zeros((2, N))
+    uu = np.zeros((2, N))
+    tt = np.zeros((1, N))
+    i=0
+    test_curr_time=5
+    with open("/home/dira/legged_robot_ws/src/legged_control/legged_body_planner/src/scripts/pf_section1.txt", "r") as filestream:
+                for line in filestream:
+                    current_line=line.split(",")
+                    tt[0,i] = np.add(float(current_line[0]),test_curr_time)
+                    xx[0,i] = float(current_line[1])
+                    xx[1,i] = float(current_line[2])
+                    uu[0,i] = float(current_line[3])
+                    uu[1,i] = float(current_line[4])
+                    #print('t: ',tt[0,i],' X: ',xx[:,i], ' u: ',uu[:,i])
+                    i=i+1
+                    if(i==N):
+                        break                             
+    # print(np.shape(X))
+    
     # print("Time trajectory size: ", np.shape(t))
     # print("State trajectory size: ", np.shape(x))
     # print("t shape: ", np.shape(t[0, :-2]))
@@ -363,7 +386,7 @@ def main():
 
     if (plot_traj == True):
         ax = fig.add_subplot(2, 2, 2)
-        ax.scatter(x[0, :-2], x[1, :-2])
+        ax.scatter(xx[0, :-2], xx[1, :-2])
         # ax.plot(t, x[0, :-2])
         # ax.plot(t, x[1,:-2])
         ax.set_xlabel('x')
@@ -371,16 +394,16 @@ def main():
         ax.set_title("Environment")
 
         ax = fig.add_subplot(2, 2, 3)
-        ax.plot(t[0, :-2], x[0, :-2], label='x')
-        ax.plot(t[0, :-2], x[1, :-2], label='y')
+        ax.plot(tt[0, :-2], xx[0, :-2], label='x')
+        ax.plot(tt[0, :-2], xx[1, :-2], label='y')
         ax.set_xlabel('time [s]')
         ax.set_ylabel("Position")
         ax.legend()
         ax.set_title("State Trajectory")
 
         ax = fig.add_subplot(2, 2, 4)
-        ax.plot(t[0, :-2], u[0, :-2], label='v_x')
-        ax.plot(t[0, :-2], u[1, :-2], label='v_y')
+        ax.plot(tt[0, :-2], uu[0, :-2], label='v_x')
+        ax.plot(tt[0, :-2], uu[1, :-2], label='v_y')
         ax.set_xlabel('time [s]')
         ax.set_title('Control Trajectory')
         ax.legend()
