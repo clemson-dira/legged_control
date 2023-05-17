@@ -122,6 +122,7 @@ Change in `PostProcessingPipelineFunctor.hpp` the following
 ```
 
 ## Build
+Build from legged control instructions
 Build legged body planner, etc.
 ```
 catkin build legged_body_planner legged_body_msgs legged_mapping legged_body_utils
