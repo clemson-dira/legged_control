@@ -106,7 +106,8 @@ Change python version
 ```
 
 Change elevation map accordingly
-Source: https://github.com/ANYbotics/elevation_mapping/issues/151
+
+Source: https://github.com/ANYbotics/elevation_mapping/issues/151 (Don't think I changed to source branch... kept with master.. TODO: double check)
 
 ```
 cd ~/legged_robot_ws/src/elevation_mapping
