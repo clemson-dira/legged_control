@@ -132,6 +132,7 @@ Change in `PostProcessingPipelineFunctor.hpp` the following
 Build from legged control instructions
 Build legged body planner, etc.
 ```
+catkin build elevation_mapping kindr kindr_ros message_logger
 catkin build legged_body_planner legged_body_msgs legged_mapping legged_body_utils
 source ~/legged_robot_ws/devel/setup.bash
 ```
