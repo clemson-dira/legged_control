@@ -132,6 +132,7 @@ Change in `PostProcessingPipelineFunctor.hpp` the following
 Build from legged control instructions
 Build legged body planner, etc.
 ```
+catkin build elevation_mapping kindr kindr_ros message_logger
 catkin build legged_body_planner legged_body_msgs legged_mapping legged_body_utils
 source ~/legged_robot_ws/devel/setup.bash
 ```
@@ -139,6 +140,8 @@ Hopefully, everything is built successfully!
 
 ## ARM SPECIFICS
 This section describes some of the detail of arm specific changes that was done
+
+### HPIPM and Blasfeo
 In `ocs2/ocs2_sqp`, need to change the CMakeLists.txt file of `hpipm_catkin` and `blasfeo_catkin`
 
 FetchContent_Declare git repo and git tag needs to be changed such that it is of the following
@@ -167,5 +170,10 @@ FetchContent_Declare(hpipmDownload
   INSTALL_COMMAND "$(MAKE) install"
 )
 ```
+
+### Opencv
+Could  not get grid_map_cv to be specified in /usr/include/opencv
+- https://github.com/ANYbotics/grid_map/issues/291
+- Changed for grid_map_cv and and grid_map_filters to have conditional and set condition to include opencv4
 
 
