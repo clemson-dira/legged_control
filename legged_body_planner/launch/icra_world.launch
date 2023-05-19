@@ -2,11 +2,12 @@
     <!-- Define args -->
     <arg name="robot_type" default="$(env ROBOT_TYPE)" doc="Robot type: [a1, aliengo, go1, laikago]" />
     <!-- Spawn Locations for different component of the map -->
-    <!-- 1st Section: x,y,z,Y: 6.5, 1, 1, -3.1415-->
+    <!-- 1st Section: -x -7.1675 -y -0.8884 -z 1.0 -Y 0-->
     <!-- 2nd Section: x,y,z,Y: 1.5, 1.5, 1.0, -3.1415-->
     <!-- 3rd Section: x,y,z,Y: 3.5, 1.5, 1.0, -3.1415-->
     <arg name="robot_spawn" default="-x -7.1675 -y -0.8884 -z 1.0 -Y 0" />
     <arg name="section" default="" />
+    <arg name="bag" default="false" />
     <arg name="world" default="$(find legged_gazebo)/worlds/icra/icra.world" />
 
     <!-- Robot Params -->
@@ -76,5 +77,10 @@
         <include file="$(find legged_body_utils)/launch/visualization.launch">
             <arg name="live_plot" value="$(arg live_plot)" />
         </include>
+    </group>
+
+    <!-- save data in ROSbag-->
+    <group if="$(arg bag)">
+        <node pkg="rosbag" type="record" name="rosbag_record" args="record -O $(find legged_body_planner)/logs/icra_obseervation_bag /legged_robot_mpc_observation"/>
     </group>
 </launch>

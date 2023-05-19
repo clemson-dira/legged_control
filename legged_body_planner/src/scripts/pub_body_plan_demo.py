@@ -26,21 +26,6 @@ TODO list
 3) Finite diff for yaw rate
 """
 
-
-# # Define global parameters
-
-dt = 0.01  # Original: 0.01
-update_rate = 10  # Hz
-horizon = 200  # Original : 100
-
-# # Density Parameters
-obs_center = [5, 0.1]
-goal = [7, 0]
-alpha = 0.2
-gain = 25
-saturation = 0.5
-rad_from_goal = 0.25
-
 class PubBodyPlanDemo:
     def __init__(self):
         rospy.init_node("pub_body_plan_demo", anonymous=True)
@@ -82,13 +67,14 @@ class PubBodyPlanDemo:
         x0 = self.state.value[6]
         y0 = self.state.value[7]
         
-        #### CHANGE HERE #########
+        #### Get Density plan #########
         density_plan = sym_density.Density(
             r1=self.r1, r2=self.r2, obs_center=self.obs_center, goal=self.goal, alpha=self.alpha,
             gain=self.gain, saturation=self.saturation, rad_from_goal=self.rad_from_goal)
         t, X, u = density_plan.get_plan(
             self.curr_time, x0, y0, self.horizon, self.dt)
-        #### END HERE ##########
+        #### END ##########
+        
         states = []
         time = []
         controls = []
@@ -105,6 +91,9 @@ class PubBodyPlanDemo:
             z_list.append(0)
             roll_list.append(0)
             pitch_list.append(0)
+            
+            ## add if else condition to test in simulation vs hardware
+            yaw_list.append(0)
 
             # Lift to full states
             # if i == 0:
@@ -114,8 +103,7 @@ class PubBodyPlanDemo:
             #     yaw_list.append(self.getYaw(
             #         [x_dot_list[-1], y_dot_list[-1]], yaw_list[-1]))
             
-            ## add if else condition to test in simulation vs hardware
-            yaw_list.append(0)
+            
 
         # Apply filter
         filtered_x_list = self.movingAverageFilter(x_list, self.window_size)
@@ -149,7 +137,9 @@ class PubBodyPlanDemo:
         plan_msg.plan_timestamp = rospy.Time(self.curr_time)
         plan_msg.times = time
         plan_msg.states = states
-
+        plan_msg.controls = controls
+        
+        '''
         ## test code
         states_0 = State(value=[0, 0, 0, 0, 0, 0,
                             0, 0, 0, 0, 0, 0])
@@ -160,11 +150,12 @@ class PubBodyPlanDemo:
         plan_msg.states = [states_0, states_1, states_2]
         plan_msg.times = [dt+0.1, 2*dt+0.1, 3*dt+0.1]
         controls = [Control(),Control(),Control()]
+        plan_msg.controls = controls
         print('test states',plan_msg.states)
         print('times',plan_msg.times)
          ## end test code
-
-        plan_msg.controls = controls
+        '''
+        
         self.body_plan_pub.publish(plan_msg)
 
     def spin(self):

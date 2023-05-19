@@ -1,7 +1,6 @@
 #! /usr/bin/env python
 
 import rospy
-import sym_density
 from legged_body_msgs.msg import Plan
 from legged_body_msgs.msg import State
 from legged_body_msgs.msg import Control
@@ -14,30 +13,15 @@ import math
 import sys
 
 """
-    pub_body_plan_demo is a demo file for publishing generic plan to the body planner node
+    pub_body_plan_pf loads an offline pf plan as a csv file for publishing generic plan to the body planner node
     Publishes generic plan to the plan topic
     Remark: This publishes to plan which legged_body_planner should subcribe to
-"""
-
-"""
-TODO list
-1) Enable multiple obstacles
-2) Filtering
-3) Finite diff for yaw rate
 """
 
 class PubBodyPlanDemo:
     def __init__(self):
         rospy.init_node("pub_body_plan_demo", anonymous=True)
         # Get parameter | TODO Add helper function to warn when param not received
-        # self.goal = rospy.get_param("/density_plan/goal")
-        # self.obs_center = rospy.get_param("/density_plan/obs_center")
-        # self.r1 = rospy.get_param("/density_plan/r1")
-        # self.r2 = rospy.get_param("/density_plan/r2")
-        # self.alpha = rospy.get_param("/density_plan/alpha")
-        # self.gain = rospy.get_param("/density_plan/gain")
-        # self.saturation = rospy.get_param("/density_plan/saturation")
-        # self.rad_from_goal = rospy.get_param("/density_plan/rad_from_goal")
         self.dt = rospy.get_param("/density_plan/dt")
         self.window_size = rospy.get_param("/density_plan/window_size")
         self.alpha1 = rospy.get_param("/density_plan/alpha1")
@@ -68,11 +52,6 @@ class PubBodyPlanDemo:
         y0 = self.state.value[7]
         
         #### Read pf plan from text file #########
-        # density_plan = sym_density.Density(
-        #     r1=self.r1, r2=self.r2, obs_center=self.obs_center, goal=self.goal, alpha=self.alpha,
-        #     gain=self.gain, saturation=self.saturation, rad_from_goal=self.rad_from_goal)
-        # t, X, u = density_plan.get_plan(
-        #     self.curr_time, x0, y0, self.horizon, self.dt)
         X = np.zeros((2, self.horizon))
         u = np.zeros((2, self.horizon))
         t = np.zeros((1, self.horizon))
@@ -84,20 +63,24 @@ class PubBodyPlanDemo:
         line_idx=1
         with open("/home/dira/legged_robot_ws/src/legged_control/legged_body_planner/src/scripts/pf_section1.txt", "r") as filestream:
                 for line in filestream:
-                    current_line=line.split(",")
-                    t[0,line_idx] = np.add(float(current_line[0]),self.curr_time)
-                    X[0,line_idx] = float(current_line[1])
-                    X[1,line_idx] = float(current_line[2])
-                    u[0,line_idx] = float(current_line[3])
-                    u[1,line_idx] = float(current_line[4])
+                    if(line_idx>1): #skip the first state to avoid jerks
+                        current_line=line.split(",")
+                        t[0,line_idx] = np.add(float(current_line[0]),self.curr_time)
+                        X[0,line_idx] = np.subtract(float(current_line[1]),-7.1675)
+                        X[1,line_idx] = np.subtract(float(current_line[2]),-0.8884)
+                        u[0,line_idx] = float(current_line[3])
+                        u[1,line_idx] = float(current_line[4])
                     line_idx=line_idx+1
                     if(line_idx==self.horizon):
-                        break                              
+                        break  
+        filestream.close()
+        #### End #########   
+                                 
         states = []
         time = []
         controls = []
         # Appending states
-        for i in range(self.horizon):
+        for i in range(0,self.horizon,10):
             x_dot_list.append(u[0, i])
             y_dot_list.append(u[1, i])
             z_dot_list.append(0)
@@ -120,52 +103,54 @@ class PubBodyPlanDemo:
             #     yaw_list.append(self.getYaw(
             #         [x_dot_list[-1], y_dot_list[-1]], yaw_list[-1]))
                        
-
-        # Apply filter (not necessary for pf planner)
-        filtered_x_list = self.movingAverageFilter(x_list, self.window_size)
-        filtered_y_list = self.movingAverageFilter(y_list, self.window_size)
-        filtered_x_dot_list = self.movingAverageFilter(
-            x_dot_list, self.window_size)
-        filtered_y_dot_list = self.movingAverageFilter(
-            y_dot_list, self.window_size)
-        filtered_yaw_list = self.applyFirstOrderFilter(yaw_list, self.alpha1)
-
-        # Get yaw rate from filter
-        yaw_dot_list = self.centralDiffMethod(filtered_yaw_list, self.dt)
-        filtered_yaw_dot_list = self.applyFirstOrderFilter(
-            yaw_dot_list, self.alpha1)
-
-        # Add time, state, and control into legged boddy msg format
-        for i in range(self.horizon):
-            states.append(State(value=[filtered_x_dot_list[i], filtered_y_dot_list[i], z_dot_list[i], roll_dot_list[i],
-                                       pitch_dot_list[i], filtered_yaw_dot_list[i],
-                                       filtered_x_list[i], filtered_y_list[i], z_list[i],
-                                       filtered_yaw_list[i], pitch_list[i], roll_list[i]]))
+        #Add time, state, and control into legged boddy msg format
+        for i in range(len(x_dot_list)):
+            states.append(State(value=[x_dot_list[i], y_dot_list[i], z_dot_list[i], roll_dot_list[i],
+                                       pitch_dot_list[i], yaw_dot_list[i],
+                                       x_list[i], y_list[i], z_list[i],
+                                       yaw_list[i], pitch_list[i], roll_list[i]]))
             time.append(t[0, i])
             controls.append(Control())
+        
+        # Apply filter (not necessary for pf planner)
+        # filtered_x_list = self.movingAverageFilter(x_list, self.window_size)
+        # filtered_y_list = self.movingAverageFilter(y_list, self.window_size)
+        # filtered_x_dot_list = self.movingAverageFilter(
+        #     x_dot_list, self.window_size)
+        # filtered_y_dot_list = self.movingAverageFilter(
+        #     y_dot_list, self.window_size)
+        # filtered_yaw_list = self.applyFirstOrderFilter(yaw_list, self.alpha1)
 
-        #print('x:',x_list)
-        #print('x_dot:',x_dot_list)
+        # # Get yaw rate from filter
+        # yaw_dot_list = self.centralDiffMethod(filtered_yaw_list, self.dt)
+        # filtered_yaw_dot_list = self.applyFirstOrderFilter(
+        #     yaw_dot_list, self.alpha1)
+
         # Add time, state, and control into legged boddy msg format
         # for i in range(self.horizon):
-        #     states.append(State(value=[x_dot_list[i], y_dot_list[i], z_dot_list[i], roll_dot_list[i],
-        #                                pitch_dot_list[i], yaw_dot_list[i],
-        #                                x_list[i], y_list[i], z_list[i],
-        #                                yaw_list[i], pitch_list[i], roll_list[i]]))
+        #     states.append(State(value=[filtered_x_dot_list[i], filtered_y_dot_list[i], z_dot_list[i], roll_dot_list[i],
+        #                                pitch_dot_list[i], filtered_yaw_dot_list[i],
+        #                                filtered_x_list[i], filtered_y_list[i], z_list[i],
+        #                                filtered_yaw_list[i], pitch_list[i], roll_list[i]]))
         #     time.append(t[0, i])
         #     controls.append(Control())
+
+        # print('x:',x_list)
+        # print('x_dot:',x_dot_list)
             
         #print('states',states)
         #print('time',time)
+        
         header = std_msgs.msg.Header()
         header.stamp = rospy.Time(self.curr_time)
         plan_msg = Plan()
         plan_msg.header.stamp = header.stamp
         plan_msg.plan_timestamp = rospy.Time(self.curr_time)
-        # plan_msg.times = time
-        # plan_msg.states = states
-
+        plan_msg.controls = controls
+        plan_msg.times = time
+        plan_msg.states = states
         
+        ''''
         ## test code
         states_0 = State(value=[0, 0, 0, 0, 0, 0,
                             0, 0, 0, 0, 0, 0])
@@ -177,12 +162,12 @@ class PubBodyPlanDemo:
         plan_msg.states = [states_0, states_1, states_2]
         plan_msg.times = [self.curr_time, 1*dt+0.1+self.curr_time, 2*dt+0.1+self.curr_time]
         controls = [Control(),Control(),Control()] 
+        plan_msg.controls = controls
         #print('test states',plan_msg.states)
         #print('times',plan_msg.times)
          ## end test code
+        '''      
         
-
-        plan_msg.controls = controls
         self.body_plan_pub.publish(plan_msg)
 
     def spin(self):
