@@ -66,8 +66,8 @@ class PubBodyPlanDemo:
                     if(line_idx>1): #skip the first state to avoid jerks
                         current_line=line.split(",")
                         t[0,line_idx] = np.add(float(current_line[0]),self.curr_time)
-                        X[0,line_idx] = np.subtract(float(current_line[1]),-7.1675)
-                        X[1,line_idx] = np.subtract(float(current_line[2]),-0.8884)
+                        X[0,line_idx] = np.subtract(float(current_line[1]), 0) # TODO : Add as a param into yaml
+                        X[1,line_idx] = np.subtract(float(current_line[2]), 0) # TODO : Same above
                         u[0,line_idx] = float(current_line[3])
                         u[1,line_idx] = float(current_line[4])
                     line_idx=line_idx+1
