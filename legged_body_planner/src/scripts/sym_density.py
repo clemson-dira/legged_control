@@ -269,7 +269,7 @@ class Density:
                 u[1, i-1] = 0
 
             # saturate the control inputs
-            if np.max(u[:, i-1]) >= saturation:
+            if np.max(np.abs(u[:, i-1])) >= saturation:
                # print('saturation')
                 u[:, i-1] = (u[:, i-1]/np.max(np.abs(u[:, i-1])))*saturation
 
