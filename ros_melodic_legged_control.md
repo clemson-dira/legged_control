@@ -15,12 +15,11 @@ Install catkin tools
 
 Upgrade CMake s.t. greater than 3.14 using the following link:
 - https://askubuntu.com/questions/829310/how-to-upgrade-cmake-in-ubuntu
-- Install Linux x86_64 shell version
-  - Linux Aarch64 for ARM system 
 
 
 
-## STEPS IN CONVERTING NOETIC TO MELODIC COMPATIBILITY
+
+## STEPS IN CONVERTING NOETIC TO MELODIC COMPATIBILITY for OCS2 & Legged Control
 ### Install Dependencies
 Install dependencies
 ```
@@ -43,9 +42,10 @@ Install legged control dependencies / clone this repo
 ```
 git clone git@github.com:clemson-dira/legged_control.git
 ```
+Install rest of dependencies listed in legged control `README.md`
 
 ### Syntactical Edits
-Change publishTransforms, etc. to ros melodic syntax
+Change publishTransforms, etc. to ros melodic syntax (in LeggedRobotVisualizer.cpp)
 - https://github.com/leggedrobotics/ocs2/issues/28
 - Or look up ros melodic documentation of the member functions
 
@@ -79,7 +79,7 @@ struct HybridJointCommand {
 ...
 ```
 
-### Build Legged Body Planner w/ mapping
+## Build Legged Body Planner w/ Mapping on ROS Melodic
 Install elevation mapping / grid map dependencies
 
 ```
@@ -136,5 +136,36 @@ catkin build legged_body_planner legged_body_msgs legged_mapping legged_body_uti
 source ~/legged_robot_ws/devel/setup.bash
 ```
 Hopefully, everything is built successfully!
+
+## ARM SPECIFICS
+This section describes some of the detail of arm specific changes that was done
+In `ocs2/ocs2_sqp`, need to change the CMakeLists.txt file of `hpipm_catkin` and `blasfeo_catkin`
+
+FetchContent_Declare git repo and git tag needs to be changed such that it is of the following
+```
+# For hpipm_catkin
+FetchContent_Declare(hpipmDownload
+  GIT_REPOSITORY https://github.com/clemson-dira/hpipm
+  GIT_TAG 0ca7dfcaebf36969bd9b0ee34063f07817566605
+  UPDATE_COMMAND ""
+  SOURCE_DIR ${HPIPM_DOWNLOAD_DIR}
+  BINARY_DIR ${HPIPM_BUILD_DIR}
+  BUILD_COMMAND $(MAKE)
+  INSTALL_COMMAND "$(MAKE) install"
+)
+```
+
+```
+# For blasfeo_catkin
+FetchContent_Declare(hpipmDownload
+  GIT_REPOSITORY https://github.com/clemson-dira/hblasfeopipm
+  GIT_TAG 3adca0b940bf8332cd8f0efb34bd13cfa56154d1
+  UPDATE_COMMAND ""
+  SOURCE_DIR ${HPIPM_DOWNLOAD_DIR}
+  BINARY_DIR ${HPIPM_BUILD_DIR}
+  BUILD_COMMAND $(MAKE)
+  INSTALL_COMMAND "$(MAKE) install"
+)
+```
 
 
