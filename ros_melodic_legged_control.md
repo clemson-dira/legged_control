@@ -140,6 +140,8 @@ Hopefully, everything is built successfully!
 
 ## ARM SPECIFICS
 This section describes some of the detail of arm specific changes that was done
+
+### HPIPM / Blasfeo
 In `ocs2/ocs2_sqp`, need to change the CMakeLists.txt file of `hpipm_catkin` and `blasfeo_catkin`
 
 FetchContent_Declare git repo and git tag needs to be changed such that it is of the following
@@ -168,5 +170,11 @@ FetchContent_Declare(hpipmDownload
   INSTALL_COMMAND "$(MAKE) install"
 )
 ```
+
+### Opencv
+Could  not get grid_map_cv to be specified in /usr/include/opencv
+- https://github.com/ANYbotics/grid_map/issues/291
+- Changed for grid_map_cv and and grid_map_filters to have conditional and set condition to include opencv4
+
 
 
