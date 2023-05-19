@@ -101,9 +101,11 @@ git clone git@github.com:ANYbotics/message_logger.git
 ### Elevation Mapping Code Adjustments
 Change C++ stl function
 - In ocs2 core Numerics.h
+  - Change std::remove_reference to C++11 version
 ```
 const auto prec = std::numeric_limits<typename std::remove_reference<T1>::type>::epsilon();
 ```
+  - Additionally, all the lines w/ `std::remove_reference_t<T1>` --> `std::remove_reference<T1>::type 
 Change python version
 - In `legged_mapping/src/tf_to_pose_publisher.py`
 ```
@@ -141,7 +143,7 @@ Hopefully, everything is built successfully!
 ## ARM SPECIFICS
 This section describes some of the detail of arm specific changes that was done
 
-### HPIPM and Blasfeo
+### HPIPM / Blasfeo
 In `ocs2/ocs2_sqp`, need to change the CMakeLists.txt file of `hpipm_catkin` and `blasfeo_catkin`
 
 FetchContent_Declare git repo and git tag needs to be changed such that it is of the following
@@ -175,5 +177,6 @@ FetchContent_Declare(hpipmDownload
 Could  not get grid_map_cv to be specified in /usr/include/opencv
 - https://github.com/ANYbotics/grid_map/issues/291
 - Changed for grid_map_cv and and grid_map_filters to have conditional and set condition to include opencv4
+
 
 
