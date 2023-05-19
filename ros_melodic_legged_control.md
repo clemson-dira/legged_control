@@ -101,9 +101,11 @@ git clone git@github.com:ANYbotics/message_logger.git
 ### Elevation Mapping Code Adjustments
 Change C++ stl function
 - In ocs2 core Numerics.h
+  - Change std::remove_reference to C++11 version
 ```
 const auto prec = std::numeric_limits<typename std::remove_reference<T1>::type>::epsilon();
 ```
+  - Additionally, all the lines w/ `std::remove_reference_t<T1>` --> `std::remove_reference<T1>::type 
 Change python version
 - In `legged_mapping/src/tf_to_pose_publisher.py`
 ```
