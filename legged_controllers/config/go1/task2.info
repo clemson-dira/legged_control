@@ -12,7 +12,7 @@ model_settings
 
   verboseCppAd                  true
   recompileLibrariesCppAd       false
-  modelFolderCppAd              /tmp/legged_control/go1
+  modelFolderCppAd              legged_control/cppAD/go1
 }
 
 swing_trajectory_config
