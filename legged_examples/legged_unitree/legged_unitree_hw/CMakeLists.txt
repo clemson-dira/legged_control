@@ -42,6 +42,7 @@ link_directories(lib/cpp/${ARCH})
 
 #set(EXTRA_LIBS libunitree_legged_sdk_amd64.so lcm)
 set(EXTRA_LIBS -pthread libunitree_legged_sdk.so)
+#set(EXTRA_LIBS -pthread libunitree_legged_sdk_arm64.so)
 # set(CMAKE_CXX_FLAGS "-03 -fPIC")
 
 ## Declare cpp executables
