@@ -1,7 +1,7 @@
 legged_body_planner:
   frame_id : odom # May delete this
   replan : false # Planner replans
-  update_rate : 5 # Hz | Stairs: 1 Hz
+  update_rate : 10 # Hz | Stairs: 1 Hz | 5 hz for replan kinda good
   dt : 0.01 # Time interval of planner
   goal_state : [5.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] # Goal state (xyz_dot, ypr_dot, xyz,ypr)
   num_states: 12 # Number of states in rigid body | Most likely delete later
@@ -21,7 +21,7 @@ density_plan:
   saturation : 0.075 # Saturation on control | Works on robot: 2-norm velocity of 1
   rad_from_goal : 0.15 # Execute switching control in problem formulation
   update_rate : 25 # Hz | Rate of feedback planner
-  horizon : 1000 # Horizon of feedback planner | 200 for stairs
+  horizon : 2000 # Horizon of feedback planner | 200 for stairs | 2000 offline atm
   dt : 0.01 # Discretization of continuous formulation of FB controller
   window_size : 21 # Moving average filter window
   alpha1 : 0.98 # First Order filter on states (e.g. yaw)
