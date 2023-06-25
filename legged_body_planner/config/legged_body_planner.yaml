@@ -11,14 +11,14 @@ trajectories_publisher:
   update_rate: 20 # Hz | Only use in spin()
   
 density_plan:
-  goal : [4.75, 0] # Target position (x,y)
+  goal : [7, 0] # Target position (x,y)
   obs_center : [1.5, 0.1, 3.5, -2] # List of center of obstacles [1.75, 0.1]
   #obs_center : [3, 0.1, 7, -1] # List of center of obstacles
   r1 : 0.5 # Parameter for Obstacle region | Original : 1.0
   r2 : 1.25 # Parameter for the outer bound of transition region | Original : 1.5
   alpha : 0.2 # Tuning parameter of Lyapunov V(x)
   gain : 10 # Control multiplier
-  saturation : 0.08 # Saturation on control | Works on robot: 2-norm velocity of 1
+  saturation : 0.05 # Saturation on control | Works on robot: 2-norm velocity of 1
   rad_from_goal : 0.15 # Execute switching control in problem formulation
   update_rate : 25 # Hz | Rate of feedback planner
   horizon : 200 # Horizon of feedback planner

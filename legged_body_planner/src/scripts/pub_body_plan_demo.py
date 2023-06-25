@@ -102,7 +102,7 @@ class PubBodyPlanDemo:
             y_list.append(X[1, i])
             z_list.append(0)
             roll_list.append(0)
-            pitch_list.append(0)
+            pitch_list.append(-0.3)
 
             # Lift to full states
             # if i == 0:
