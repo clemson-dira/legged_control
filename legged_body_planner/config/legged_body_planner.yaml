@@ -1,7 +1,7 @@
 legged_body_planner:
   frame_id : odom # May delete this
-  replan : false # Planner replans
-  update_rate : 10 # Hz | Stairs: 1 Hz | 5 hz for replan kinda good
+  replan : true # Planner replans
+  update_rate : 20 # Hz | Stairs: 1 Hz, 10hz, 20hz- | 5 hz for replan kinda good
   dt : 0.01 # Time interval of planner
   goal_state : [5.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] # Goal state (xyz_dot, ypr_dot, xyz,ypr)
   num_states: 12 # Number of states in rigid body | Most likely delete later
@@ -11,17 +11,17 @@ trajectories_publisher:
   update_rate: 20 # Hz | Only use in spin()
   
 density_plan:
-  goal : [-5.0, 0.0] # Target position (x,y) | w.r.t local frame | Simulation.. it has knowledge of what is forward/backward in global frame.. HW prob not
-  obs_center : [-10, -10, -12, -12] # List of center of obstacles [1.75, 0.1]
-  #obs_center : [3, 0.1, 7, -1] # List of center of obstacles
+  goal : [5.0, 0.0] # Target position (x,y) | w.r.t local frame | Simulation.. it has knowledge of what is forward/backward in global frame.. HW prob not
+  # obs_center : [-10, -10, -12, -12] # List of center of obstacles [1.75, 0.1]
+  obs_center : [3, 0.1, 7, -1] # List of center of obstacles
   r1 : 0.5 # Parameter for Obstacle region | Original : 1.0
   r2 : 1.25 # Parameter for the outer bound of transition region | Original : 1.5
   alpha : 0.2 # Tuning parameter of Lyapunov V(x)
   gain : 10 # Control multiplier
-  saturation : 0.075 # Saturation on control | Works on robot: 2-norm velocity of 1
+  saturation : 0.25 # Saturation on control | Works on robot: 2-norm velocity of 1 | 0.25-0.7 good for stairs
   rad_from_goal : 0.15 # Execute switching control in problem formulation
   update_rate : 25 # Hz | Rate of feedback planner
-  horizon : 2000 # Horizon of feedback planner | 200 for stairs | 2000 offline atm
+  horizon : 200 # Horizon of feedback planner | 200 for stairs | 2000 offline atm
   dt : 0.01 # Discretization of continuous formulation of FB controller
   window_size : 21 # Moving average filter window
   alpha1 : 0.98 # First Order filter on states (e.g. yaw)

@@ -94,17 +94,17 @@ class PubBodyPlanDemo:
             y_list.append(X[1, i])
             z_list.append(0)
             roll_list.append(0)
-            pitch_list.append(0)
+            pitch_list.append(-0.8)
 
             # Lift to full states
-            # if i == 0:
-            #     yaw_list.append(self.getYaw(
-            #         [x_dot_list[-1], y_dot_list[-1]]))
-            # else:
-            #     yaw_list.append(self.getYaw(
-            #         [x_dot_list[-1], y_dot_list[-1]], yaw_list[-1]))
+            if i == 0:
+                yaw_list.append(self.getYaw(
+                    [x_dot_list[-1], y_dot_list[-1]]))
+            else:
+                yaw_list.append(self.getYaw(
+                    [x_dot_list[-1], y_dot_list[-1]], yaw_list[-1]))
             # yaw_list.append(-3.1415)
-            yaw_list.append(-3.14)
+            # yaw_list.append(0)
 
         # Apply filter
         filtered_x_list = self.movingAverageFilter(x_list, self.window_size)
