@@ -2,13 +2,13 @@ centroidalModelType             0      // 0: FullCentroidalDynamics, 1: Single R
 
 legged_robot_interface
 {
-  verbose                               false  // show the loaded parameters
+  verbose                               true  // show the loaded parameters
 }
 
 model_settings
 {
   positionErrorGain             0.0
-  phaseTransitionStanceTime     0.1 ; Original 0.1
+  phaseTransitionStanceTime     0.3; Original 0.1
 
   verboseCppAd                  true
   recompileLibrariesCppAd       false
@@ -310,8 +310,8 @@ weight
 kalmanFilter
 {
     footRadius                  0.02
-    imuProcessNoisePosition     0.2
-    imuProcessNoiseVelocity     0.2
+    imuProcessNoisePosition     0.2 ; Good: 0.2
+    imuProcessNoiseVelocity     0.2 ; Good: 0.2
     footProcessNoisePosition    0.002
     footSensorNoisePosition     0.005
     footSensorNoiseVelocity     0.1

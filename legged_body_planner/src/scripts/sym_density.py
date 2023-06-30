@@ -329,10 +329,10 @@ def symlog(x):
 def main():
     plot_density = True
     plot_traj = True
-    density = Density(r1=0.5, r2=1.25, obs_center=[1.5, 0.1, 3.5, -2], goal=[
-                      5.0, 0], alpha=0.2, gain=10, saturation=0.1, rad_from_goal=0.15)
+    density = Density(r1=1.0, r2=1.5, obs_center=[2, 0.1], goal=[
+                      5.0, 0], alpha=0.2, gain=10, saturation=0.25, rad_from_goal=0.15)
 
-    N = 10000
+    N = 3000
     dt = 0.01
     x0 = 0
     y0 = 0

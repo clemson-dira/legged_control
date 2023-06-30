@@ -3,6 +3,7 @@
     <arg name="hung_up" default="false" />
     <arg name="rviz" default="false" />
     <arg name="rviz_config" default="$(find legged_unitree_hw)/launch/rviz_config.rviz" />
+    <arg name="live_plot" default="false" />
 
     <group if="$(eval arg('robot_type') == 'go1')">
         <!-- Go1 version -->
@@ -30,5 +31,12 @@
         <node pkg="rviz" type="rviz" name="rviz" respawn="false" output="screen"
             args="-d $(arg rviz_config)" />
     </group>
+
+    <group if="$(arg live_plot)">
+        <include file="$(find legged_body_utils)/launch/visualization.launch">
+            <arg name="live_plot" value="$(arg live_plot)" />
+        </include>
+    </group>
+
 
 </launch>
