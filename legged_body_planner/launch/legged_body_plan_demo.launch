@@ -2,6 +2,7 @@
     <!-- Define args -->
     <arg name="robot_type" default="$(env ROBOT_TYPE)" doc="Robot type: [a1, aliengo, go1, laikago]" />
     <arg name="robot_spawn" default="-x 0.0 -y 0.0 -z 0.5 -Y 0.0" />
+    <arg name="bag" default="true" />
 
     <!-- Robot Params -->
     <arg name="urdfFile" default="/tmp/legged_control/$(arg robot_type).urdf" />
@@ -64,9 +65,17 @@
     <node pkg="legged_body_planner" type="legged_body_planner_node" name="legged_body_planner"
         output="screen" launch-prefix="gnome-terminal --" />
 
+    <!-- Enable live plot -->
     <group if="$(arg live_plot)">
         <include file="$(find legged_body_utils)/launch/visualization.launch">
             <arg name="live_plot" value="$(arg live_plot)" />
+        </include>
+    </group>
+
+    <!-- Enable rosbag record -->
+    <group if="$(arg bag)">
+        <include file="$(find legged_body_utils)/launch/logging.launch">
+            <arg name="bag_name" value="legged_log" />
         </include>
     </group>
 </launch>

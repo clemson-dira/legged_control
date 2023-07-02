@@ -38,5 +38,11 @@
         </include>
     </group>
 
+    <!-- Enable rosbag record -->
+    <group if="$(arg bag)">
+        <include file="$(find legged_body_utils)/launch/logging.launch">
+            <arg name="bag_name" value="legged_log" />
+        </include>
+    </group>
 
 </launch>
