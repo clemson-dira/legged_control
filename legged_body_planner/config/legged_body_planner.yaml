@@ -1,7 +1,7 @@
 legged_body_planner:
   frame_id : odom # May delete this
   replan : true # Planner replans
-  update_rate : 10 # Hz
+  update_rate : 50 # Hz | 10 hz
   dt : 0.01 # Time interval of planner
   goal_state : [5.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] # Goal state (xyz_dot, ypr_dot, xyz,ypr)
   num_states: 12 # Number of states in rigid body | Most likely delete later

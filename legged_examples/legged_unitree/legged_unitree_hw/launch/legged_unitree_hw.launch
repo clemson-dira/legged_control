@@ -4,6 +4,7 @@
     <arg name="rviz" default="false" />
     <arg name="rviz_config" default="$(find legged_unitree_hw)/launch/rviz_config.rviz" />
     <arg name="live_plot" default="false" />
+    <arg name="bag" default="false" />
 
     <group if="$(eval arg('robot_type') == 'go1')">
         <!-- Go1 version -->
@@ -13,6 +14,8 @@
             args="$(find legged_unitree_description)/urdf/go1/robot.xacro $(arg robot_type)" />
 
     </group>
+    <!-- Comment out as go1 should be the only robot for now -->
+    <!--
     <group unless="$(eval arg('robot_type') == 'go1')">
         <param name="legged_robot_description"
             command="$(find xacro)/xacro $(find legged_unitree_description)/urdf/robot.xacro
@@ -20,7 +23,7 @@
         <node name="generate_urdf" pkg="legged_common" type="generate_urdf.sh" output="screen"
             args="$(find legged_unitree_description)/urdf/robot.xacro $(arg robot_type)" />
 
-    </group>
+    </group> -->
     <rosparam file="$(find legged_unitree_hw)/config/$(arg robot_type).yaml" command="load" />
 
     <param name="robot_type" value="$(arg robot_type)" />
@@ -32,6 +35,7 @@
             args="-d $(arg rviz_config)" />
     </group>
 
+    <!-- TODO : Move this to when running controller or plan s.t. modularized-->
     <group if="$(arg live_plot)">
         <include file="$(find legged_body_utils)/launch/visualization.launch">
             <arg name="live_plot" value="$(arg live_plot)" />

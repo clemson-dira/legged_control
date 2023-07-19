@@ -22,7 +22,7 @@ B = 2*math.pi/period
 rate_mult = 0.01  # Publish rate a factor of the period
 
 # rate = rospy.Rate(1/(rate_mult*period))  # Hz
-rate = rospy.Rate(0.1)
+rate = rospy.Rate(50)
 dt = rate_mult*period  # Discrete time step
 
 
