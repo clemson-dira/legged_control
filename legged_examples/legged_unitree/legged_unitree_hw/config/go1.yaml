@@ -4,3 +4,4 @@ legged_unitree_hw:
   thread_priority: 95
   power_limit: 4 # Original value: 4
   contact_threshold: 40
+  enable_raw_data: true # Publish raw data

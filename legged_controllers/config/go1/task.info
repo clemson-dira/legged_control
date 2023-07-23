@@ -310,10 +310,10 @@ weight
 kalmanFilter
 {
     footRadius                  0.02
-    imuProcessNoisePosition     0.2 ; Good: 0.2
+    imuProcessNoisePosition     0.04 ; Good: 0.2
     imuProcessNoiseVelocity     0.2 ; Good: 0.2
     footProcessNoisePosition    0.002
     footSensorNoisePosition     0.005
-    footSensorNoiseVelocity     0.1
-    footHeightSensorNoise       0.01
+    footSensorNoiseVelocity     0.1 ; Original: 0.1
+    footHeightSensorNoise       0.01 ; Original: 0.01
 }

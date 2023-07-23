@@ -1,11 +1,12 @@
 //
 // Created by qiayuan on 2022/7/24.
 //
-
+// clang-format off
 #include <pinocchio/fwd.hpp>
 
 #include <pinocchio/algorithm/frames.hpp>
 #include <pinocchio/algorithm/kinematics.hpp>
+// clang-format on
 
 #include "legged_estimation/LinearKalmanFilter.h"
 
@@ -15,9 +16,13 @@
 
 namespace legged {
 
-KalmanFilterEstimate::KalmanFilterEstimate(PinocchioInterface pinocchioInterface, CentroidalModelInfo info,
-                                           const PinocchioEndEffectorKinematics& eeKinematics)
-    : StateEstimateBase(std::move(pinocchioInterface), std::move(info), eeKinematics), tfListener_(tfBuffer_), topicUpdated_(false) {
+KalmanFilterEstimate::KalmanFilterEstimate(
+    PinocchioInterface pinocchioInterface, CentroidalModelInfo info,
+    const PinocchioEndEffectorKinematics& eeKinematics)
+    : StateEstimateBase(std::move(pinocchioInterface), std::move(info),
+                        eeKinematics),
+      tfListener_(tfBuffer_),
+      topicUpdated_(false) {
   xHat_.setZero();
   ps_.setZero();
   vs_.setZero();
@@ -28,9 +33,11 @@ KalmanFilterEstimate::KalmanFilterEstimate(PinocchioInterface pinocchioInterface
   b_.setZero();
 
   Eigen::Matrix<scalar_t, Eigen::Dynamic, Eigen::Dynamic> c1(3, 6);
-  c1 << Eigen::Matrix<scalar_t, 3, 3>::Identity(), Eigen::Matrix<scalar_t, 3, 3>::Zero();
+  c1 << Eigen::Matrix<scalar_t, 3, 3>::Identity(),
+      Eigen::Matrix<scalar_t, 3, 3>::Zero();
   Eigen::Matrix<scalar_t, Eigen::Dynamic, Eigen::Dynamic> c2(3, 6);
-  c2 << Eigen::Matrix<scalar_t, 3, 3>::Zero(), Eigen::Matrix<scalar_t, 3, 3>::Identity();
+  c2 << Eigen::Matrix<scalar_t, 3, 3>::Zero(),
+      Eigen::Matrix<scalar_t, 3, 3>::Identity();
   c_.setZero();
   c_.block(0, 0, 3, 6) = c1;
   c_.block(3, 0, 3, 6) = c1;
@@ -53,16 +60,22 @@ KalmanFilterEstimate::KalmanFilterEstimate(PinocchioInterface pinocchioInterface
   eeKinematics_->setPinocchioInterface(pinocchioInterface_);
 
   world2odom_.setRotation(tf2::Quaternion::getIdentity());
-  sub_ = ros::NodeHandle().subscribe<nav_msgs::Odometry>("/tracking_camera/odom/sample", 10, &KalmanFilterEstimate::callback, this);
+  sub_ = ros::NodeHandle().subscribe<nav_msgs::Odometry>(
+      "/tracking_camera/odom/sample", 10, &KalmanFilterEstimate::callback,
+      this);
 }
 
-vector_t KalmanFilterEstimate::update(const ros::Time& time, const ros::Duration& period) {
+vector_t KalmanFilterEstimate::update(const ros::Time& time,
+                                      const ros::Duration& period) {
   scalar_t dt = period.toSec();
   a_.block(0, 3, 3, 3) = dt * Eigen::Matrix<scalar_t, 3, 3>::Identity();
-  b_.block(0, 0, 3, 3) = 0.5 * dt * dt * Eigen::Matrix<scalar_t, 3, 3>::Identity();
+  b_.block(0, 0, 3, 3) =
+      0.5 * dt * dt * Eigen::Matrix<scalar_t, 3, 3>::Identity();
   b_.block(3, 0, 3, 3) = dt * Eigen::Matrix<scalar_t, 3, 3>::Identity();
-  q_.block(0, 0, 3, 3) = (dt / 20.f) * Eigen::Matrix<scalar_t, 3, 3>::Identity();
-  q_.block(3, 3, 3, 3) = (dt * 9.81f / 20.f) * Eigen::Matrix<scalar_t, 3, 3>::Identity();
+  q_.block(0, 0, 3, 3) =
+      (dt / 20.f) * Eigen::Matrix<scalar_t, 3, 3>::Identity();
+  q_.block(3, 3, 3, 3) =
+      (dt * 9.81f / 20.f) * Eigen::Matrix<scalar_t, 3, 3>::Identity();
   q_.block(6, 6, 12, 12) = dt * Eigen::Matrix<scalar_t, 12, 12>::Identity();
 
   const auto& model = pinocchioInterface_.getModel();
@@ -72,14 +85,19 @@ vector_t KalmanFilterEstimate::update(const ros::Time& time, const ros::Duration
   vector_t qPino(info_.generalizedCoordinatesNum);
   vector_t vPino(info_.generalizedCoordinatesNum);
   qPino.setZero();
-  qPino.segment<3>(3) = rbdState_.head<3>();  // Only set orientation, let position in origin.
+  qPino.segment<3>(3) =
+      rbdState_.head<3>();  // Only set orientation, let position in origin.
   qPino.tail(actuatedDofNum) = rbdState_.segment(6, actuatedDofNum);
 
   vPino.setZero();
-  vPino.segment<3>(3) = getEulerAnglesZyxDerivativesFromGlobalAngularVelocity<scalar_t>(
-      qPino.segment<3>(3),
-      rbdState_.segment<3>(info_.generalizedCoordinatesNum));  // Only set angular velocity, let linear velocity be zero
-  vPino.tail(actuatedDofNum) = rbdState_.segment(6 + info_.generalizedCoordinatesNum, actuatedDofNum);
+  vPino.segment<3>(3) =
+      getEulerAnglesZyxDerivativesFromGlobalAngularVelocity<scalar_t>(
+          qPino.segment<3>(3),
+          rbdState_.segment<3>(
+              info_.generalizedCoordinatesNum));  // Only set angular velocity,
+                                                  // let linear velocity be zero
+  vPino.tail(actuatedDofNum) =
+      rbdState_.segment(6 + info_.generalizedCoordinatesNum, actuatedDofNum);
 
   pinocchio::forwardKinematics(model, data, qPino, vPino);
   pinocchio::updateFramePlacements(model, data);
@@ -87,12 +105,14 @@ vector_t KalmanFilterEstimate::update(const ros::Time& time, const ros::Duration
   const auto eePos = eeKinematics_->getPosition(vector_t());
   const auto eeVel = eeKinematics_->getVelocity(vector_t(), vector_t());
 
-  Eigen::Matrix<scalar_t, 18, 18> q = Eigen::Matrix<scalar_t, 18, 18>::Identity();
+  Eigen::Matrix<scalar_t, 18, 18> q =
+      Eigen::Matrix<scalar_t, 18, 18>::Identity();
   q.block(0, 0, 3, 3) = q_.block(0, 0, 3, 3) * imuProcessNoisePosition_;
   q.block(3, 3, 3, 3) = q_.block(3, 3, 3, 3) * imuProcessNoiseVelocity_;
   q.block(6, 6, 12, 12) = q_.block(6, 6, 12, 12) * footProcessNoisePosition_;
 
-  Eigen::Matrix<scalar_t, 28, 28> r = Eigen::Matrix<scalar_t, 28, 28>::Identity();
+  Eigen::Matrix<scalar_t, 28, 28> r =
+      Eigen::Matrix<scalar_t, 28, 28>::Identity();
   r.block(0, 0, 12, 12) = r_.block(0, 0, 12, 12) * footSensorNoisePosition_;
   r.block(12, 12, 12, 12) = r_.block(12, 12, 12, 12) * footSensorNoiseVelocity_;
   r.block(24, 24, 4, 4) = r_.block(24, 24, 4, 4) * footHeightSensorNoise_;
@@ -107,10 +127,14 @@ vector_t KalmanFilterEstimate::update(const ros::Time& time, const ros::Duration
     bool isContact = contactFlag_[i];
 
     scalar_t high_suspect_number(100);
-    q.block(qIndex, qIndex, 3, 3) = (isContact ? 1. : high_suspect_number) * q.block(qIndex, qIndex, 3, 3);
-    r.block(rIndex1, rIndex1, 3, 3) = (isContact ? 1. : high_suspect_number) * r.block(rIndex1, rIndex1, 3, 3);
-    r.block(rIndex2, rIndex2, 3, 3) = (isContact ? 1. : high_suspect_number) * r.block(rIndex2, rIndex2, 3, 3);
-    r(rIndex3, rIndex3) = (isContact ? 1. : high_suspect_number) * r(rIndex3, rIndex3);
+    q.block(qIndex, qIndex, 3, 3) =
+        (isContact ? 1. : high_suspect_number) * q.block(qIndex, qIndex, 3, 3);
+    r.block(rIndex1, rIndex1, 3, 3) = (isContact ? 1. : high_suspect_number) *
+                                      r.block(rIndex1, rIndex1, 3, 3);
+    r.block(rIndex2, rIndex2, 3, 3) = (isContact ? 1. : high_suspect_number) *
+                                      r.block(rIndex2, rIndex2, 3, 3);
+    r(rIndex3, rIndex3) =
+        (isContact ? 1. : high_suspect_number) * r(rIndex3, rIndex3);
 
     ps_.segment(3 * i, 3) = -eePos[i];
     ps_.segment(3 * i, 3)[2] += footRadius_;
@@ -118,7 +142,9 @@ vector_t KalmanFilterEstimate::update(const ros::Time& time, const ros::Duration
   }
 
   vector3_t g(0, 0, -9.81);
-  vector3_t accel = getRotationMatrixFromZyxEulerAngles(quatToZyx(quat_)) * linearAccelLocal_ + g;
+  vector3_t accel = getRotationMatrixFromZyxEulerAngles(quatToZyx(quat_)) *
+                        linearAccelLocal_ +
+                    g;
 
   Eigen::Matrix<scalar_t, 28, 1> y;
   y << ps_, vs_, feetHeights_;
@@ -146,7 +172,7 @@ vector_t KalmanFilterEstimate::update(const ros::Time& time, const ros::Duration
   }
 
   if (topicUpdated_) {
-    updateFromTopic();
+    updateFromTopic();  // Mocap data
     topicUpdated_ = false;
   }
 
@@ -165,15 +191,20 @@ void KalmanFilterEstimate::updateFromTopic() {
   auto* msg = buffer_.readFromRT();
 
   tf2::Transform world2sensor;
-  world2sensor.setOrigin(tf2::Vector3(msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z));
-  world2sensor.setRotation(tf2::Quaternion(msg->pose.pose.orientation.x, msg->pose.pose.orientation.y, msg->pose.pose.orientation.z,
-                                           msg->pose.pose.orientation.w));
+  world2sensor.setOrigin(tf2::Vector3(msg->pose.pose.position.x,
+                                      msg->pose.pose.position.y,
+                                      msg->pose.pose.position.z));
+  world2sensor.setRotation(tf2::Quaternion(
+      msg->pose.pose.orientation.x, msg->pose.pose.orientation.y,
+      msg->pose.pose.orientation.z, msg->pose.pose.orientation.w));
 
-  if (world2odom_.getRotation() == tf2::Quaternion::getIdentity())  // First received
+  if (world2odom_.getRotation() ==
+      tf2::Quaternion::getIdentity())  // First received
   {
     tf2::Transform odom2sensor;
     try {
-      geometry_msgs::TransformStamped tf_msg = tfBuffer_.lookupTransform("odom", msg->child_frame_id, msg->header.stamp);
+      geometry_msgs::TransformStamped tf_msg = tfBuffer_.lookupTransform(
+          "odom", msg->child_frame_id, msg->header.stamp);
       tf2::fromMsg(tf_msg.transform, odom2sensor);
     } catch (tf2::TransformException& ex) {
       ROS_WARN("%s", ex.what());
@@ -183,14 +214,17 @@ void KalmanFilterEstimate::updateFromTopic() {
   }
   tf2::Transform base2sensor;
   try {
-    geometry_msgs::TransformStamped tf_msg = tfBuffer_.lookupTransform("base", msg->child_frame_id, msg->header.stamp);
+    geometry_msgs::TransformStamped tf_msg = tfBuffer_.lookupTransform(
+        "base", msg->child_frame_id, msg->header.stamp);
     tf2::fromMsg(tf_msg.transform, base2sensor);
   } catch (tf2::TransformException& ex) {
     ROS_WARN("%s", ex.what());
     return;
   }
-  tf2::Transform odom2base = world2odom_.inverse() * world2sensor * base2sensor.inverse();
-  vector3_t newPos(odom2base.getOrigin().x(), odom2base.getOrigin().y(), odom2base.getOrigin().z());
+  tf2::Transform odom2base =
+      world2odom_.inverse() * world2sensor * base2sensor.inverse();
+  vector3_t newPos(odom2base.getOrigin().x(), odom2base.getOrigin().y(),
+                   odom2base.getOrigin().z());
 
   const auto& model = pinocchioInterface_.getModel();
   auto& data = pinocchioInterface_.getData();
@@ -235,11 +269,15 @@ nav_msgs::Odometry KalmanFilterEstimate::getOdomMsg() {
   for (int i = 0; i < 3; ++i) {
     for (int j = 0; j < 3; ++j) {
       odom.pose.covariance[i * 6 + j] = p_(i, j);
-      odom.pose.covariance[6 * (3 + i) + (3 + j)] = orientationCovariance_(i * 3 + j);
+      odom.pose.covariance[6 * (3 + i) + (3 + j)] =
+          orientationCovariance_(i * 3 + j);
     }
   }
-  //  The twist in this message should be specified in the coordinate frame given by the child_frame_id: "base"
-  vector_t twist = getRotationMatrixFromZyxEulerAngles(quatToZyx(quat_)).transpose() * xHat_.segment<3>(3);
+  //  The twist in this message should be specified in the coordinate frame
+  //  given by the child_frame_id: "base"
+  vector_t twist =
+      getRotationMatrixFromZyxEulerAngles(quatToZyx(quat_)).transpose() *
+      xHat_.segment<3>(3);
   odom.twist.twist.linear.x = twist.x();
   odom.twist.twist.linear.y = twist.y();
   odom.twist.twist.linear.z = twist.z();
@@ -249,28 +287,38 @@ nav_msgs::Odometry KalmanFilterEstimate::getOdomMsg() {
   for (int i = 0; i < 3; ++i) {
     for (int j = 0; j < 3; ++j) {
       odom.twist.covariance[i * 6 + j] = p_.block<3, 3>(3, 3)(i, j);
-      odom.twist.covariance[6 * (3 + i) + (3 + j)] = angularVelCovariance_(i * 3 + j);
+      odom.twist.covariance[6 * (3 + i) + (3 + j)] =
+          angularVelCovariance_(i * 3 + j);
     }
   }
   return odom;
 }
 
-void KalmanFilterEstimate::loadSettings(const std::string& taskFile, bool verbose) {
+void KalmanFilterEstimate::loadSettings(const std::string& taskFile,
+                                        bool verbose) {
   boost::property_tree::ptree pt;
   boost::property_tree::read_info(taskFile, pt);
   std::string prefix = "kalmanFilter.";
   if (verbose) {
     std::cerr << "\n #### Kalman Filter Noise:";
-    std::cerr << "\n #### =============================================================================\n";
+    std::cerr << "\n #### "
+                 "============================================================="
+                 "================\n";
   }
 
   loadData::loadPtreeValue(pt, footRadius_, prefix + "footRadius", verbose);
-  loadData::loadPtreeValue(pt, imuProcessNoisePosition_, prefix + "imuProcessNoisePosition", verbose);
-  loadData::loadPtreeValue(pt, imuProcessNoiseVelocity_, prefix + "imuProcessNoiseVelocity", verbose);
-  loadData::loadPtreeValue(pt, footProcessNoisePosition_, prefix + "footProcessNoisePosition", verbose);
-  loadData::loadPtreeValue(pt, footSensorNoisePosition_, prefix + "footSensorNoisePosition", verbose);
-  loadData::loadPtreeValue(pt, footSensorNoiseVelocity_, prefix + "footSensorNoiseVelocity", verbose);
-  loadData::loadPtreeValue(pt, footHeightSensorNoise_, prefix + "footHeightSensorNoise", verbose);
+  loadData::loadPtreeValue(pt, imuProcessNoisePosition_,
+                           prefix + "imuProcessNoisePosition", verbose);
+  loadData::loadPtreeValue(pt, imuProcessNoiseVelocity_,
+                           prefix + "imuProcessNoiseVelocity", verbose);
+  loadData::loadPtreeValue(pt, footProcessNoisePosition_,
+                           prefix + "footProcessNoisePosition", verbose);
+  loadData::loadPtreeValue(pt, footSensorNoisePosition_,
+                           prefix + "footSensorNoisePosition", verbose);
+  loadData::loadPtreeValue(pt, footSensorNoiseVelocity_,
+                           prefix + "footSensorNoiseVelocity", verbose);
+  loadData::loadPtreeValue(pt, footHeightSensorNoise_,
+                           prefix + "footHeightSensorNoise", verbose);
 }
 
 }  // namespace legged

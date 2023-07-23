@@ -5,13 +5,16 @@
 
 #pragma once
 
+#include <legged_hw/LeggedHW.h>
+#include <unitree_legged_msgs/LowCmd.h>
+#include <unitree_legged_msgs/LowState.h>
+
 #include "unitree_legged_sdk/safety.h"
 #include "unitree_legged_sdk/udp.h"
 
-#include <legged_hw/LeggedHW.h>
-
 namespace legged {
-const std::vector<std::string> CONTACT_SENSOR_NAMES = {"RF_FOOT", "LF_FOOT", "RH_FOOT", "LH_FOOT"};
+const std::vector<std::string> CONTACT_SENSOR_NAMES = {"RF_FOOT", "LF_FOOT",
+                                                       "RH_FOOT", "LH_FOOT"};
 
 struct UnitreeMotorData {
   double pos_, vel_, tau_;                 // state
@@ -32,8 +35,9 @@ class UnitreeHW : public LeggedHW {
   UnitreeHW() = default;
   /** \brief Get necessary params from param server. Init hardware_interface.
    *
-   * Get params from param server and check whether these params are set. Load urdf of robot. Set up transmission and
-   * joint limit. Get configuration of can bus and create data pointer which point to data received from Can bus.
+   * Get params from param server and check whether these params are set. Load
+   * urdf of robot. Set up transmission and joint limit. Get configuration of
+   * can bus and create data pointer which point to data received from Can bus.
    *
    * @param root_nh Root node-handle of a ROS node.
    * @param robot_hw_nh Node-handle for robot hardware.
@@ -52,8 +56,8 @@ class UnitreeHW : public LeggedHW {
   /** \brief Comunicate with hardware. Publish command to robot.
    *
    * Propagate joint state to actuator state for the stored
-   * transmission. Limit cmd_effort into suitable value. Call @ref UNITREE_LEGGED_SDK::UDP::Recv(). Publish actuator
-   * current state.
+   * transmission. Limit cmd_effort into suitable value. Call @ref
+   * UNITREE_LEGGED_SDK::UDP::Recv(). Publish actuator current state.
    *
    * @param time Current time
    * @param period Current time - last time
@@ -67,11 +71,16 @@ class UnitreeHW : public LeggedHW {
 
   bool setupContactSensor(ros::NodeHandle& nh);
 
+  ros::NodeHandle nh_;
+  ros::Publisher lowStatePub_;
+  ros::Publisher lowCmdPub_;
+
   std::shared_ptr<UNITREE_LEGGED_SDK::UDP> udp_;
   std::shared_ptr<UNITREE_LEGGED_SDK::Safety> safety_;
   UNITREE_LEGGED_SDK::LowState lowState_{};
   UNITREE_LEGGED_SDK::LowCmd lowCmd_{};
 
+  bool enable_raw_data_;
   UnitreeMotorData jointData_[12]{};  // NOLINT(modernize-avoid-c-arrays)
   UnitreeImuData imuData_{};
   bool contactState_[4]{};  // NOLINT(modernize-avoid-c-arrays)

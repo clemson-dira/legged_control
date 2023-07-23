@@ -26,8 +26,9 @@ class LeggedHW : public hardware_interface::RobotHW {
   LeggedHW() = default;
   /** \brief Get necessary params from param server. Init hardware_interface.
    *
-   * Get params from param server and check whether these params are set. Load urdf of robot. Set up transmission and
-   * joint limit. Get configuration of can bus and create data pointer which point to data received from Can bus.
+   * Get params from param server and check whether these params are set. Load
+   * urdf of robot. Set up transmission and joint limit. Get configuration of
+   * can bus and create data pointer which point to data received from Can bus.
    *
    * @param root_nh Root node-handle of a ROS node.
    * @param robot_hw_nh Node-handle for robot hardware.
@@ -37,12 +38,17 @@ class LeggedHW : public hardware_interface::RobotHW {
 
  protected:
   // Interface
-  hardware_interface::JointStateInterface jointStateInterface_;  // NOLINT(misc-non-private-member-variables-in-classes)
-  hardware_interface::ImuSensorInterface imuSensorInterface_;    // NOLINT(misc-non-private-member-variables-in-classes)
-  HybridJointInterface hybridJointInterface_;                    // NOLINT(misc-non-private-member-variables-in-classes)
-  ContactSensorInterface contactSensorInterface_;                // NOLINT(misc-non-private-member-variables-in-classes)
+  hardware_interface::JointStateInterface
+      jointStateInterface_;  // NOLINT(misc-non-private-member-variables-in-classes)
+  hardware_interface::ImuSensorInterface
+      imuSensorInterface_;  // NOLINT(misc-non-private-member-variables-in-classes)
+  HybridJointInterface
+      hybridJointInterface_;  // NOLINT(misc-non-private-member-variables-in-classes)
+  ContactSensorInterface
+      contactSensorInterface_;  // NOLINT(misc-non-private-member-variables-in-classes)
   // URDF model of the robot
-  std::shared_ptr<urdf::Model> urdfModel_;  // NOLINT(misc-non-private-member-variables-in-classes)
+  std::shared_ptr<urdf::Model>
+      urdfModel_;  // NOLINT(misc-non-private-member-variables-in-classes)
 
  private:
   /** \brief Load urdf of robot from param server.

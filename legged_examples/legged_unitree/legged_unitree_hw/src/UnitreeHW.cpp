@@ -12,11 +12,21 @@ bool UnitreeHW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) {
   }
 
   robot_hw_nh.getParam("power_limit", powerLimit_);
+  robot_hw_nh.getParam("enable_raw_data", enable_raw_data_);
+  nh_ = root_nh;
 
+  // Setup publishers
+  lowStatePub_ =
+      nh_.advertise<unitree_legged_msgs::LowState>("/unitree/low_state", 1);
+  lowCmdPub_ =
+      nh_.advertise<unitree_legged_msgs::LowCmd>("/unitree/low_cmd", 1);
+
+  // Get joint handles
   setupJoints();
   setupImu();
   setupContactSensor(robot_hw_nh);
 
+  // Set communication with Unitree interface
   // udp_ =
   // std::make_shared<UNITREE_LEGGED_SDK::UDP>(UNITREE_LEGGED_SDK::LOWLEVEL);
   udp_ = std::make_shared<UNITREE_LEGGED_SDK::UDP>(
@@ -82,6 +92,32 @@ void UnitreeHW::read(const ros::Time& /*time*/,
     handle.setVelocityDesired(0.);
     handle.setKd(3.);
   }
+
+  // Publish raw data
+  if (enable_raw_data_) {
+    // Publish received data
+    unitree_legged_msgs::LowState lowStateData_{};
+    // Low State
+    // IMU & GRF
+    lowStateData_.imu.temperature = lowState_.imu.temperature;
+    for (std::size_t i = 0; i < 3; ++i) {
+      lowStateData_.imu.rpy[i] = lowState_.imu.rpy[i];
+      lowStateData_.imu.gyroscope[i] = lowState_.imu.gyroscope[i];
+      lowStateData_.imu.accelerometer[i] = lowState_.imu.accelerometer[i];
+    }
+    for (std::size_t i = 0; i < 4; ++i) {
+      lowStateData_.imu.quaternion[i] = imuData_.ori_[i];
+    }
+    // q, dq, tau
+    for (std::size_t i = 0; i < 12; ++i) {
+      lowStateData_.motorState[i].temperature =
+          lowState_.motorState[i].temperature;
+      lowStateData_.motorState[i].q = lowState_.motorState[i].q;
+      lowStateData_.motorState[i].dq = lowState_.motorState[i].dq;
+      lowStateData_.motorState[i].tauEst = lowState_.motorState[i].tauEst;
+    }
+    lowStatePub_.publish(lowStateData_);
+  }
 }
 
 void UnitreeHW::write(const ros::Time& /*time*/,
@@ -92,16 +128,28 @@ void UnitreeHW::write(const ros::Time& /*time*/,
     lowCmd_.motorCmd[i].Kp = static_cast<float>(jointData_[i].kp_);
     lowCmd_.motorCmd[i].Kd = static_cast<float>(jointData_[i].kd_);
     lowCmd_.motorCmd[i].tau = static_cast<float>(jointData_[i].ff_);
-    // ROS_WARN_THROTTLE(2, "Tick time: %hu", lowState_.tick);
-    // ROS_WARN_THROTTLE(2, "joint: %d", i);
-    // // ROS_WARN("Desired q: %0.2f", lowCmd_.motorCmd[i].q);
-    // // ROS_WARN("Desired dq: %0.2f", lowCmd_.motorCmd[i].dq);
-    // ROS_WARN_THROTTLE(2, "Kp: %0.2f", lowCmd_.motorCmd[i].Kp);
-    // ROS_WARN_THROTTLE(2, "Kd: %0.2f", lowCmd_.motorCmd[i].Kd);
-    // ROS_WARN_THROTTLE(2, "Torque: %0.2f", lowCmd_.motorCmd[i].tau);
   }
+  // Unitree safety filter
   safety_->PositionLimit(lowCmd_);
   safety_->PowerProtect(lowCmd_, lowState_, powerLimit_);
+
+  // Publish with safety filter | TODO: Future might not want to pub data
+  // from safety filter
+  // TODO (AZ): Use realtime ros
+  if (enable_raw_data_) {
+    unitree_legged_msgs::LowCmd lowCmdData_{};
+    // Low Cmd
+    for (std::size_t i = 0; i < 12; ++i) {  // TODO (AZ) No need for std::size_t
+      lowCmdData_.motorCmd[i].q = lowCmd_.motorCmd[i].q;
+      lowCmdData_.motorCmd[i].dq = lowCmd_.motorCmd[i].dq;
+      lowCmdData_.motorCmd[i].Kp = lowCmd_.motorCmd[i].Kp;
+      lowCmdData_.motorCmd[i].Kd = lowCmd_.motorCmd[i].Kd;
+      lowCmdData_.motorCmd[i].tau = lowCmd_.motorCmd[i].tau;
+    }
+
+    // Publish desired command
+    lowCmdPub_.publish(lowCmdData_);
+  }
   udp_->SetSend(lowCmd_);
   udp_->Send();
 }

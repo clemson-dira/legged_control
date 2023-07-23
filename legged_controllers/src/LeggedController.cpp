@@ -35,6 +35,7 @@ bool LeggedController::init(hardware_interface::RobotHW* robot_hw,
   controller_nh.getParam("/taskFile", taskFile);
   controller_nh.getParam("/referenceFile", referenceFile);
   bool verbose = false;
+  // enable_raw_pub_ = true;
   loadData::loadCppDataType(taskFile, "legged_robot_interface.verbose",
                             verbose);
 
@@ -70,6 +71,23 @@ bool LeggedController::init(hardware_interface::RobotHW* robot_hw,
   imuSensorHandle_ =
       robot_hw->get<hardware_interface::ImuSensorInterface>()->getHandle(
           "unitree_imu");
+  // // Raw data publisher | TODO (AZ): Find out if you ever need raw data near
+  // state estimation
+  // std::cout << "leggedInterface centroidal model info state
+  // dim: "
+  //           << leggedInterface_->getCentroidalModelInfo().stateDim
+  //           << '\n';  // 24
+  // std::cout << "leggedInterface centroidal model info state dim: "
+  //           << leggedInterface_->getCentroidalModelInfo().inputDim
+  //           << '\n';  // 24
+  // // TODO (AZ): Get raw data for centroidal model and motors, etc.
+  // raw_centroidal_state_.resize(leggedInterface_->getCentroidalModelInfo().stateDim);
+  // raw_inputs_.resize(leggedInterface_->getCentroidalModelInfo().inputDim);
+
+  // const std::string robotName =
+  //     "legged_robot";  // TODO (AZ): All robotName make not magic number
+  // rawDataPublisher_ = nh.advertise<ocs2_msgs::mpc_observation>(
+  //     robotName + "_raw_observation", 1);
 
   // State estimation
   setupStateEstimate(taskFile, verbose);
@@ -168,6 +186,8 @@ void LeggedController::update(const ros::Time& time,
                            mpcMrtInterface_->getCommand());
   selfCollisionVisualization_->update(currentObservation_);
 
+  // Publish the raw state. Comparison for observed data (filtered, etc.)
+  // TODO (AZ): HERE WHAT IS BEST WAY TO GET RAW DATA
   // Publish the observation. Only needed for the command interface
   observationPublisher_.publish(
       ros_msg_conversions::createObservationMsg(currentObservation_));
@@ -204,6 +224,8 @@ void LeggedController::updateStateEstimation(const ros::Time& time,
     linearAccelCovariance(i) =
         imuSensorHandle_.getLinearAccelerationCovariance()[i];
   }
+
+  // TODO(AZ): Put state vector here
 
   stateEstimate_->updateJointStates(jointPos, jointVel);
   stateEstimate_->updateContact(contactFlag);
@@ -275,6 +297,7 @@ void LeggedController::setupMpc() {
   rosReferenceManagerPtr->subscribe(nh);
   mpc_->getSolverPtr()->addSynchronizedModule(gaitReceiverPtr);
   mpc_->getSolverPtr()->setReferenceManager(rosReferenceManagerPtr);
+  // Publisher
   observationPublisher_ = nh.advertise<ocs2_msgs::mpc_observation>(
       robotName + "_mpc_observation", 1);
 }
@@ -299,7 +322,7 @@ void LeggedController::setupMrt() {
             leggedInterface_->mpcSettings().mpcDesiredFrequency_);
       } catch (const std::exception& e) {
         controllerRunning_ = false;
-        ROS_ERROR_STREAM("[Ocs2 MPC thread] Error : " << e.what());
+        ROS_ERROR_STREAM("[OCS2 MPC thread] Error : " << e.what());
         stopRequest(ros::Time());
       }
     }

@@ -17,6 +17,7 @@ endif()
 find_package(catkin REQUIRED
         COMPONENTS
         roscpp
+        unitree_legged_msgs
         legged_hw
         )
 
@@ -25,6 +26,7 @@ catkin_package(
         include
         CATKIN_DEPENDS
         roscpp
+        unitree_legged_msgs
         legged_hw
 )
 
