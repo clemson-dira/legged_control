@@ -97,8 +97,7 @@ void UnitreeHW::read(const ros::Time& /*time*/,
   if (enable_raw_data_) {
     // Publish received data
     unitree_legged_msgs::LowState lowStateData_{};
-    // Low State
-    // IMU & GRF
+    // TODO (AZ): Get all data
     lowStateData_.imu.temperature = lowState_.imu.temperature;
     for (std::size_t i = 0; i < 3; ++i) {
       lowStateData_.imu.rpy[i] = lowState_.imu.rpy[i];

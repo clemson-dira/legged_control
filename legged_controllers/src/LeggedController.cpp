@@ -225,8 +225,6 @@ void LeggedController::updateStateEstimation(const ros::Time& time,
         imuSensorHandle_.getLinearAccelerationCovariance()[i];
   }
 
-  // TODO(AZ): Put state vector here
-
   stateEstimate_->updateJointStates(jointPos, jointVel);
   stateEstimate_->updateContact(contactFlag);
   stateEstimate_->updateImu(quat, angularVel, linearAccel,
@@ -342,6 +340,7 @@ void LeggedController::setupStateEstimate(const std::string& taskFile,
 
 void LeggedCheaterController::setupStateEstimate(
     const std::string& /*taskFile*/, bool /*verbose*/) {
+  ROS_WARN("Setting up cheater controller");
   stateEstimate_ = std::make_shared<FromTopicStateEstimate>(
       leggedInterface_->getPinocchioInterface(),
       leggedInterface_->getCentroidalModelInfo(), *eeKinematicsPtr_);

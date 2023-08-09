@@ -5,7 +5,7 @@
     <group if="$(eval arg('robot_type') == 'go1')">
         <param name="robot_description"
             command="$(find xacro)/xacro $(find legged_unitree_description)/urdf/go1/robot.xacro
-            robot_type:=$(arg robot_type) hung_up:=$(arg hung_up)" />
+            robot_type:=$(arg robot_type) hung_up:=$(arg hung_up) MOCAP:=true" />
     </group>
     <group unless="$(eval arg('robot_type') == 'go1')">
         <param name="robot_description"

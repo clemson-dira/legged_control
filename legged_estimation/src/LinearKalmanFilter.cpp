@@ -60,8 +60,10 @@ KalmanFilterEstimate::KalmanFilterEstimate(
   eeKinematics_->setPinocchioInterface(pinocchioInterface_);
 
   world2odom_.setRotation(tf2::Quaternion::getIdentity());
+  // Subscriber for mocap system
+  // TODO (AZ): Have it subscribe to phasespace but use original IMU data
   sub_ = ros::NodeHandle().subscribe<nav_msgs::Odometry>(
-      "/tracking_camera/odom/sample", 10, &KalmanFilterEstimate::callback,
+      "/legged_ps/odom/world2sensor", 10, &KalmanFilterEstimate::callback,
       this);
 }
 
@@ -81,6 +83,7 @@ vector_t KalmanFilterEstimate::update(const ros::Time& time,
   const auto& model = pinocchioInterface_.getModel();
   auto& data = pinocchioInterface_.getData();
   size_t actuatedDofNum = info_.actuatedDofNum;
+  // std::cout << "Actuated dof num: " << actuatedDofNum << std::endl; // 12
 
   vector_t qPino(info_.generalizedCoordinatesNum);
   vector_t vPino(info_.generalizedCoordinatesNum);
@@ -104,6 +107,8 @@ vector_t KalmanFilterEstimate::update(const ros::Time& time,
 
   const auto eePos = eeKinematics_->getPosition(vector_t());
   const auto eeVel = eeKinematics_->getVelocity(vector_t(), vector_t());
+  // std::cout << "eePos size: " << eePos.size() << std::endl; // size is 4 w/
+  // // prob 3 in each vector
 
   Eigen::Matrix<scalar_t, 18, 18> q =
       Eigen::Matrix<scalar_t, 18, 18>::Identity();
@@ -136,6 +141,8 @@ vector_t KalmanFilterEstimate::update(const ros::Time& time,
     r(rIndex3, rIndex3) =
         (isContact ? 1. : high_suspect_number) * r(rIndex3, rIndex3);
 
+    // std::cout << "-eePos[" << i << "]: " << -eePos[i]
+    //           << std::endl;  // [0.17, 0.09, 0.28]^T
     ps_.segment(3 * i, 3) = -eePos[i];
     ps_.segment(3 * i, 3)[2] += footRadius_;
     vs_.segment(3 * i, 3) = -eeVel[i];
@@ -144,7 +151,7 @@ vector_t KalmanFilterEstimate::update(const ros::Time& time,
   vector3_t g(0, 0, -9.81);
   vector3_t accel = getRotationMatrixFromZyxEulerAngles(quatToZyx(quat_)) *
                         linearAccelLocal_ +
-                    g;
+                    g;  // TODO (AZ): Don't think this is right
 
   Eigen::Matrix<scalar_t, 28, 1> y;
   y << ps_, vs_, feetHeights_;
@@ -171,7 +178,8 @@ vector_t KalmanFilterEstimate::update(const ros::Time& time,
     p_.block(0, 0, 2, 2) /= 10.;
   }
 
-  if (topicUpdated_) {
+  // std::cout << "topic updated: " << topicUpdated_ << std::endl;
+  if (topicUpdated_) {  // TODO (AZ): Update from phasespace topic
     updateFromTopic();  // Mocap data
     topicUpdated_ = false;
   }
@@ -184,13 +192,32 @@ vector_t KalmanFilterEstimate::update(const ros::Time& time,
   odom.child_frame_id = "base";
   publishMsgs(odom);
 
+  // // TEST
+  // try {
+  //   //
+  //   https://answers.ros.org/question/194046/the-problem-of-transformerlookuptransform/
+  //   // https://github.com/ros/geometry/issues/108
+  //   //
+  //   https://math.stackexchange.com/questions/3493647/do-coordinate-components-transform-in-the-same-or-opposite-way-as-their-bases
+  //   tf2::Transform base2sensor;
+  //   geometry_msgs::TransformStamped tf_msg =
+  //       tfBuffer_.lookupTransform("base", "unitree_mocap_sensor",
+  //       ros::Time(0));
+  //   tf2::fromMsg(tf_msg.transform, base2sensor);
+  //   std::cout << "tf_msg x: " << tf_msg.transform.translation.z << std::endl;
+  // } catch (tf2::TransformException& ex) {
+  //   ROS_WARN("%s", ex.what());
+  // }
+
   return rbdState_;
 }
 
 void KalmanFilterEstimate::updateFromTopic() {
+  // TODO (AZ): See into the future | A: Don't think I can do much yet unless tf
+  // message filter
   auto* msg = buffer_.readFromRT();
 
-  tf2::Transform world2sensor;
+  tf2::Transform world2sensor;  // Coordiante transf from world to sensor
   world2sensor.setOrigin(tf2::Vector3(msg->pose.pose.position.x,
                                       msg->pose.pose.position.y,
                                       msg->pose.pose.position.z));
@@ -203,17 +230,38 @@ void KalmanFilterEstimate::updateFromTopic() {
   {
     tf2::Transform odom2sensor;
     try {
-      geometry_msgs::TransformStamped tf_msg = tfBuffer_.lookupTransform(
-          "odom", msg->child_frame_id, msg->header.stamp);
-      tf2::fromMsg(tf_msg.transform, odom2sensor);
+      // Seems buffer too slow to store new transforms compared to receiving
+      // data
+      // geometry_msgs::TransformStamped tf_msg = tfBuffer_.lookupTransform(
+      //     "odom", msg->child_frame_id, msg->header.stamp);
+      geometry_msgs::TransformStamped tf_msg =
+          tfBuffer_.lookupTransform("odom", msg->child_frame_id, ros::Time(0));
+      tf2::fromMsg(tf_msg.transform, odom2sensor);  // "Fixed" Frame for init
+      // std::cout << "odom2sensor: (" << odom2sensor.getOrigin().x() << ", "
+      //           << odom2sensor.getOrigin().y() << ", "
+      //           << odom2sensor.getOrigin().z() << ")"
+      //           << std::endl;  // Expect positive z
     } catch (tf2::TransformException& ex) {
       ROS_WARN("%s", ex.what());
       return;
     }
-    world2odom_ = world2sensor * odom2sensor.inverse();
+    world2odom_ = world2sensor * odom2sensor.inverse();  // "Fixed" frame
+    // std::cout << "world2sensor: (" << world2sensor.getOrigin().x() << ", "
+    //           << world2sensor.getOrigin().y() << ", "
+    //           << world2sensor.getOrigin().z() << ")" << std::endl;
+    // std::cout << "odom2sensor inverse: ("
+    //           << odom2sensor.inverse().getOrigin().x() << ", "
+    //           << odom2sensor.inverse().getOrigin().y() << ", "
+    //           << odom2sensor.inverse().getOrigin().z() << ")" << std::endl;
+    // std::cout << "world2odom: (" << world2odom_.getOrigin().x() << ", "
+    //           << world2odom_.getOrigin().y() << ", "
+    //           << world2odom_.getOrigin().z() << ")" << std::endl;
   }
-  tf2::Transform base2sensor;
+
+  tf2::Transform base2sensor;  // Fixed frame
   try {
+    // geometry_msgs::TransformStamped tf_msg = tfBuffer_.lookupTransform(
+    //     "base", msg->header.frame_id, msg->header.stamp);
     geometry_msgs::TransformStamped tf_msg = tfBuffer_.lookupTransform(
         "base", msg->child_frame_id, msg->header.stamp);
     tf2::fromMsg(tf_msg.transform, base2sensor);
@@ -221,15 +269,21 @@ void KalmanFilterEstimate::updateFromTopic() {
     ROS_WARN("%s", ex.what());
     return;
   }
+
+  // Read left to right
   tf2::Transform odom2base =
       world2odom_.inverse() * world2sensor * base2sensor.inverse();
   vector3_t newPos(odom2base.getOrigin().x(), odom2base.getOrigin().y(),
                    odom2base.getOrigin().z());
 
+  // ROS_INFO_THROTTLE(1, "odom2base: (%0.2f, %0.2f, %0.2f)",
+  //                   odom2base.getOrigin().x(), odom2base.getOrigin().y(),
+  //                   odom2base.getOrigin().z());
+
   const auto& model = pinocchioInterface_.getModel();
   auto& data = pinocchioInterface_.getData();
 
-  vector_t qPino(info_.generalizedCoordinatesNum);
+  vector_t qPino(info_.generalizedCoordinatesNum);  // Dimension 18
   qPino.head<3>() = newPos;
   qPino.segment<3>(3) = rbdState_.head<3>();
   qPino.tail(info_.actuatedDofNum) = rbdState_.segment(6, info_.actuatedDofNum);
@@ -254,6 +308,7 @@ void KalmanFilterEstimate::updateFromTopic() {
 void KalmanFilterEstimate::callback(const nav_msgs::Odometry::ConstPtr& msg) {
   buffer_.writeFromNonRT(*msg);
   topicUpdated_ = true;
+  // std::cout << "Mocap callback" << std::endl;
 }
 
 nav_msgs::Odometry KalmanFilterEstimate::getOdomMsg() {
@@ -277,7 +332,7 @@ nav_msgs::Odometry KalmanFilterEstimate::getOdomMsg() {
   //  given by the child_frame_id: "base"
   vector_t twist =
       getRotationMatrixFromZyxEulerAngles(quatToZyx(quat_)).transpose() *
-      xHat_.segment<3>(3);
+      xHat_.segment<3>(3);  // body angular vel?
   odom.twist.twist.linear.x = twist.x();
   odom.twist.twist.linear.y = twist.y();
   odom.twist.twist.linear.z = twist.z();

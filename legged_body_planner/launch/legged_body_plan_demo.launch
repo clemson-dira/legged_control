@@ -2,7 +2,9 @@
     <!-- Define args -->
     <arg name="robot_type" default="$(env ROBOT_TYPE)" doc="Robot type: [a1, aliengo, go1, laikago]" />
     <arg name="robot_spawn" default="-x 0.0 -y 0.0 -z 0.5 -Y 0.0" />
-    <arg name="bag" default="true" />
+    <arg name="bag" default="false" />
+    <arg name="enable_mapping" default="true" />
+    <arg name="use_sim_time" default="true" />
 
     <!-- Robot Params -->
     <arg name="urdfFile" default="/tmp/legged_control/$(arg robot_type).urdf" />
@@ -41,6 +43,7 @@
         <arg name="rviz_config" value="$(arg rviz_config)" />
         <arg name="robot_type" value="$(arg robot_type)" />
         <arg name="paused" value="$(arg paused)" />
+        <arg name="use_sim_time" value="$(arg use_sim_time)" />
     </include>
 
     <!-- Load controller -->
@@ -56,10 +59,12 @@
         <arg name="legged_pub" value="false" />
     </include>
 
-    <include file="$(find legged_mapping)/launch/legged_mapping.launch">
-        <arg name="robot_type" value="$(arg robot_type)" />
-        <arg name="multi_realsense_enabled" value="$(arg multi_realsense_enabled)" />
-    </include>
+    <group if="$(arg enable_mapping)">
+        <include file="$(find legged_mapping)/launch/legged_mapping.launch">
+            <arg name="robot_type" value="$(arg robot_type)" />
+            <arg name="multi_realsense_enabled" value="$(arg multi_realsense_enabled)" />
+        </include>
+    </group>
 
     <!-- Launch planner -->
     <node pkg="legged_body_planner" type="legged_body_planner_node" name="legged_body_planner"

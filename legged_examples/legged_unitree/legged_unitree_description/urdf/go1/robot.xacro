@@ -3,6 +3,7 @@
 <robot name="go1" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
     <xacro:arg name="DEBUG" default="false" />
+    <xacro:arg name="MOCAP" default="false" />
 
     <xacro:include filename="$(find legged_unitree_description)/urdf/go1/const.xacro" />
     <xacro:include filename="$(find legged_unitree_description)/urdf/go1/materials.xacro" />
@@ -11,6 +12,9 @@
     <xacro:include filename="$(find legged_unitree_description)/urdf/go1/depthCamera.xacro" />
     <xacro:include filename="$(find legged_unitree_description)/urdf/go1/ultraSound.xacro" />
     <xacro:include filename="$(find legged_unitree_description)/urdf/go1/imu.xacro" />
+    <xacro:if value="$(arg MOCAP)">
+        <xacro:include filename="$(find legged_unitree_description)/urdf/go1/mocap.xacro" />
+    </xacro:if>
 
     <!-- Rotor related joint and link is only for demonstrate location. -->
     <!-- Actually, the rotor will rotate and the joint is not fixed. Reduction ratio should be
@@ -73,7 +77,11 @@
     </joint> -->
 
     <xacro:IMU connected_to="base" imu_name="unitree_imu" xyz="0. 0. 0." rpy="0. 0. 0." />
-
+    <xacro:if value="$(arg MOCAP)">
+        <xacro:mocap connected_to="base" mocap_name="unitree_mocap_sensor"
+            xyz="0. 0. ${trunk_height/2}"
+            rpy="0. 0. 0." />
+    </xacro:if>
 
     <xacro:leg name="RF" mirror="-1" mirror_dae="False" front_hind="1" front_hind_dae="True" />
     <xacro:leg name="LF" mirror="1" mirror_dae="True" front_hind="1" front_hind_dae="True" />
